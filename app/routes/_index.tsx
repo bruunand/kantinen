@@ -31,11 +31,11 @@ export const meta: MetaFunction = () => {
 };
 
 const isPastLunch = (time: Date) => {
-  if (time.getHours() >= 13) {
+  if (time.getUTCHours() >= 12) {
     return true;
   }
 
-  return time.getHours() == 12 && time.getMinutes() >= 30;
+  return time.getUTCHours() == 11 && time.getUTCMinutes() >= 30;
 };
 
 const getDailyMenu = (menu: Menu): DailyMenu[] | undefined => {
