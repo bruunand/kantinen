@@ -85,7 +85,6 @@ export async function loader(): Promise<Meal[]> {
 
   const dailyMenu = getDailyMenu(await response.json());
   if (!dailyMenu) {
-    console.log("No daily menu found")
     return [{text: "¯\\_(ツ)_/¯", vegeratian: false}];
   }
 
@@ -103,10 +102,8 @@ export default function Index() {
   return (
     <div className="centerWrapper">
       {data.map((meal) => (
-        <p>
-          <span className={meal.vegeratian ? 'vegetarian' : 'main'}>
-            {meal.text}
-          </span>
+        <p className={meal.vegeratian ? 'vegetarianCourse' : 'mainCourse'}>
+          {meal.text}
         </p>
       ))}
     </div>

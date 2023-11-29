@@ -3,13 +3,11 @@ body {
   overflow: hidden;
 }
 
-span.main {
+.mainCourse {
   font-size: 4rem;
-  margin: 0;
-  animation: 
 }
 
-span.vegetarian {
+.vegetarianCourse {
   font-size: 2.5rem;
 }
 
