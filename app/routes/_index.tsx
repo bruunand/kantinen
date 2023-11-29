@@ -31,12 +31,11 @@ export const meta: MetaFunction = () => {
 };
 
 const isPastLunch = (time: Date) => {
-  // TODO: What is summertime?
-  if (time.getHours() >= 12) {
+  if (time.getHours() >= 13) {
     return true;
   }
 
-  return time.getHours() == 11 && time.getMinutes() >= 30;
+  return time.getHours() == 12 && time.getMinutes() >= 30;
 };
 
 const getDailyMenu = (menu: Menu): DailyMenu[] | undefined => {
