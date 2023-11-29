@@ -77,6 +77,13 @@ const getEmoji = (meal: string) => {
   return "🍽";
 };
 
+const soupParser = (meal: string) => {
+  if (meal.toLocaleLowerCase().includes('suppe')) {
+    return meal.replace('suppe', 'vand');
+  }
+  return meal;
+}
+
 export async function loader(): Promise<Meal[]> {
   const response = await fetch(
     'https://www.shop.foodandco.dk/api/WeeklyMenu?restaurantId=1042&languageCode=da-DK'
@@ -84,12 +91,12 @@ export async function loader(): Promise<Meal[]> {
 
   const dailyMenu = getDailyMenu(await response.json());
   if (!dailyMenu) {
-    return [{text: "¯\\_(ツ)_/¯", vegeratian: false}];
+    return [{ text: "¯\\_(ツ)_/¯", vegeratian: false }];
   }
 
   return dailyMenu.map((menu) => {
     return {
-      text: `${getEmoji(menu.menu)} ${menu.menu}`,
+      text: `${getEmoji(menu.menu)} ${soupParser(menu.menu)}`,
       vegeratian: menu.type === VEGETARIAN_MENU,
     };
   });
@@ -97,7 +104,7 @@ export async function loader(): Promise<Meal[]> {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  
+
   return (
     <div className="centerWrapper">
       {data.map((meal) => (
