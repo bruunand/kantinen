@@ -107,8 +107,8 @@ export default function Index() {
 
   return (
     <div className="centerWrapper">
-      {data.map((meal) => (
-        <p className={meal.vegeratian ? 'vegetarianCourse' : 'mainCourse'}>
+      {data.map((meal, index) => (
+        <p key={index} className={meal.vegeratian ? 'vegetarianCourse' : 'mainCourse'}>
           {meal.text}
         </p>
       ))}
