@@ -50,7 +50,7 @@ const getDailyMenu = (menu: Menu): DailyMenu[] | undefined => {
 
 const getEmoji = (meal: string) => {
   const mealToEmojiMap = new Map([
-    [["vegetar", "vegan"], "🥦"],
+    [["vegetar", "vegan", "dahl"], "🥦"],
     [["chili"], "🌶"],
     [["burger", "bøfsandwich"], "🍔"],
     [["hotdog"], "🌭"],
@@ -69,6 +69,7 @@ const getEmoji = (meal: string) => {
     [["kartofler"], "🥔"],
     [["æg"], "🥚"],
     [["suppe"], "🥣"],
+    [["hare"], "🐇"],
   ]);
 
   const normalizedMeal = meal.toLowerCase();
