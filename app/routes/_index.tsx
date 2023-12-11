@@ -50,6 +50,7 @@ const getDailyMenu = (menu: Menu): DailyMenu[] | undefined => {
 
 const getEmoji = (meal: string) => {
   const mealToEmojiMap = new Map([
+    [["hare"], "🐇"],
     [["vegetar", "vegan", "dahl"], "🥦"],
     [["chili"], "🌶"],
     [["burger", "bøfsandwich"], "🍔"],
@@ -69,7 +70,6 @@ const getEmoji = (meal: string) => {
     [["kartofler"], "🥔"],
     [["æg"], "🥚"],
     [["suppe"], "🥣"],
-    [["hare"], "🐇"],
     [["skildpadde"], "🐢"],
   ]);
 
