@@ -57,6 +57,7 @@ const getEmoji = (meal: string) => {
     [["hotdog"], "🌭"],
     [["pizza"], "🍕"],
     [["kalkun"], "🦃"],
+    [["diablo", "djævle"], "😈"],
     [["kylling", "høns", "cordon bleu"], "🐔"],
     [["fisk", "torsk", "laks"], "🐟"],
     [["bøf", "okse", "kalv"], "🐮"],
@@ -71,7 +72,6 @@ const getEmoji = (meal: string) => {
     [["æg"], "🥚"],
     [["suppe"], "🥣"],
     [["skildpadde"], "🐢"],
-    [["diablo", "djævle"], "😈"],
   ]);
 
   const normalizedMeal = meal.toLowerCase();
