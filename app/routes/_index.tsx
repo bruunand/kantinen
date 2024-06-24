@@ -58,7 +58,7 @@ const getEmoji = (meal: string) => {
     [["pizza"], "🍕"],
     [["kalkun"], "🦃"],
     [["diablo", "djævle"], "😈"],
-    [["kylling", "høns", "cordon bleu"], "🐔"],
+    [["kylling", "høns", "cordon bleu", "chicken"], "🐔"],
     [["fisk", "torsk", "laks"], "🐟"],
     [["bøf", "okse", "kalv"], "🐮"],
     [["gris", "svin", "medister", "flæsk", "skinke", "hamburgerryg", "pork", "boller i karry"], "🐷"],
