@@ -30,13 +30,13 @@ export const meta: MetaFunction = () => {
   ];
 };
 
-const isPastLunch = (time: Date) => {
-  if (time.getUTCHours() >= 12) {
-    return true;
-  }
+  const isPastLunch = (time: Date) => {
+    if (time.getUTCHours() >= 11) {
+      return true;
+    }
 
-  return time.getUTCHours() == 11 && time.getUTCMinutes() >= 30;
-};
+    return time.getUTCHours() == 10 && time.getUTCMinutes() >= 30;
+  };
 
 const getDailyMenu = (menu: Menu): DailyMenu[] | undefined => {
   let baseTime = new Date();
