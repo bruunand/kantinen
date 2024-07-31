@@ -19,8 +19,6 @@ const generateImagePromptForMeal = (meal: string): string => {
 };
 
 const generateImage = async (prompt: string): Promise<string> => {
-  return "https://web-assets.limewire.media/u/7fec4354-7a6f-4502-906b-2cfd85b1ad9b/b5c3368f-d53e-4470-9969-6345a6fde108.d/post_image_large.jpeg";
-  return "https://iili.io/duA9x6X.png";
   const resp = await fetch("https://api.limewire.com/api/image/generation", {
     method: "POST",
     headers: {
