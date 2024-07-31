@@ -35,6 +35,7 @@ const generateImage = async (prompt: string): Promise<string> => {
 
   const data = (await resp.json()) as LimewireCreateImageApiResponse;
   if (data.status !== "COMPLETED") {
+    console.error("Limewire API call failed", data);
     throw new Error("Image generation failed");
   }
   const url = data.data[0]?.asset_url;

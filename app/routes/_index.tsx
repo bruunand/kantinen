@@ -13,7 +13,10 @@ export async function loader() {
   const firstNonVeganMeal = meals.find((meal) => !meal.vegeratian);
   const backgroundImageJob = getImageBackground(
     firstNonVeganMeal?.originalMealName
-  );
+  ).catch((err) => {
+    console.error("Could not generate image", err);
+    return null;
+  });
 
   return defer({ meals, backgroundImageJob });
 }
