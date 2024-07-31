@@ -6,7 +6,7 @@ export const getImageBackground = async (meal: string | undefined) => {
     return null;
   }
   const date = new Date();
-  const key = mapDateToKey(date);
+  const key = `prison-${mapDateToKey(date)}`;
   const url = await getImageUrlForKey(key);
 
   if (url) {

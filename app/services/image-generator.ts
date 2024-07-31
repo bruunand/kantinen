@@ -11,10 +11,10 @@ export const generateImageForMeal = async (key: string, meal: string) => {
 
 const generateImagePromptForMeal = (meal: string): string => {
   return (
-    "Create a high-resolution image of a beautifully arranged meal on a stylish table setting. " +
-    `The scene should feature ${meal} on elegant plates, garnished with fresh herbs and colorful vegetables. ` +
-    "The background should be softly blurred to emphasize the food, with warm, natural lighting that highlights " +
-    "the textures and vibrant colors of the dishes. Include tasteful cutlery and a clean napkin, to complete the inviting and appetizing presentation."
+    "Create a high-resolution image of a harshly presented meal on a cold, metallic table setting. " +
+    `The scene should feature ${meal} on dented, utilitarian trays, accompanied by plain, dull sides. ` +
+    "The background should be stark and desolate, with harsh, fluorescent lighting that casts sharp shadows and emphasizes " +
+    "the rough textures and muted colors of the food. Include basic, worn-out cutlery and a stained, rough napkin, to complete the bleak and uninviting presentation."
   );
 };
 
