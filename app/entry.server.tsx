@@ -12,7 +12,7 @@ import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
 import { renderToPipeableStream } from "react-dom/server";
 
-const ABORT_DELAY = 5_000;
+const ABORT_DELAY = 60_000; // This is set high to make sure we have time to calculate an image background
 
 export default function handleRequest(
   request: Request,

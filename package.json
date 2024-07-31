@@ -10,21 +10,22 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@remix-run/css-bundle": "^2.3.1",
-    "@remix-run/node": "^2.3.1",
-    "@remix-run/react": "^2.3.1",
-    "@remix-run/serve": "^2.3.1",
+    "@remix-run/css-bundle": "^2.10.3",
+    "@remix-run/node": "^2.10.3",
+    "@remix-run/react": "^2.10.3",
+    "@remix-run/serve": "^2.10.3",
+    "cloudinary": "^2.4.0",
     "isbot": "^3.6.8",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.3.1",
-    "@remix-run/eslint-config": "^2.3.1",
-    "@types/react": "^18.2.20",
-    "@types/react-dom": "^18.2.7",
+    "@remix-run/dev": "^2.10.3",
+    "@remix-run/eslint-config": "^2.10.3",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
     "eslint": "^8.38.0",
-    "typescript": "^5.1.6"
+    "typescript": "^5.5.4"
   },
   "engines": {
     "node": ">=18.0.0"
