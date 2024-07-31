@@ -20,11 +20,8 @@ export const getCurrentMeals = async (): Promise<Meal[]> => {
 };
 
 const isPastLunch = (time: Date) => {
-  if (time.getUTCHours() >= 11) {
-    return true;
-  }
-
-  return time.getUTCHours() == 10 && time.getUTCMinutes() >= 30;
+  const hour = Number(time.toLocaleTimeString("da-DK", { hour: "numeric" }));
+  return hour >= 13;
 };
 
 const getDailyMenu = (menu: Menu): DailyMenu[] | undefined => {
