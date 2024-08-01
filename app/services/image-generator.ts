@@ -1,21 +1,36 @@
 import { persistImageInCloud } from "./image-uploader";
+import { Theme } from "./theme";
 import { getRequiredEnv } from "./variables";
 
-export const generateImageForMeal = async (key: string, meal: string) => {
-  console.log("Generating a new image", { key, meal });
-  const prompt = generateImagePromptForMeal(meal);
+export const generateImageForMeal = async (
+  key: string,
+  meal: string,
+  theme: Theme
+) => {
+  console.log("Generating a new image", { key, meal, theme });
+  const prompt = generateImagePromptForMeal(meal, theme);
 
   const imageUrl = await generateImage(prompt);
   return await persistImageInCloud(key, imageUrl);
 };
 
-const generateImagePromptForMeal = (meal: string): string => {
-  return (
-    "Create a high-resolution image of a beautifully arranged meal on a stylish table setting. " +
-    `The scene should feature ${meal} on elegant plates, garnished with fresh herbs and colorful vegetables. ` +
-    "The background should be softly blurred to emphasize the food, with warm, natural lighting that highlights " +
-    "the textures and vibrant colors of the dishes. Include tasteful cutlery and a clean napkin, to complete the inviting and appetizing presentation."
-  );
+const generateImagePromptForMeal = (meal: string, theme: Theme): string => {
+  switch (theme) {
+    case "prison":
+      return (
+        "Create a high-resolution image of a harshly presented meal on a cold, metallic table setting. " +
+        `The scene should feature ${meal} on dented, utilitarian trays, accompanied by plain, dull sides. ` +
+        "The background should be stark and desolate, with harsh, fluorescent lighting that casts sharp shadows and emphasizes " +
+        "the rough textures and muted colors of the food. Include basic, worn-out cutlery and a stained, rough napkin, to complete the bleak and uninviting presentation."
+      );
+    default:
+      return (
+        "Create a high-resolution image of a beautifully arranged meal on a stylish table setting. " +
+        `The scene should feature ${meal} on elegant plates, garnished with fresh herbs and colorful vegetables. ` +
+        "The background should be softly blurred to emphasize the food, with warm, natural lighting that highlights " +
+        "the textures and vibrant colors of the dishes. Include tasteful cutlery and a clean napkin, to complete the inviting and appetizing presentation."
+      );
+  }
 };
 
 const generateImage = async (prompt: string): Promise<string> => {
