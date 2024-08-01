@@ -1,4 +1,3 @@
-import styles from "~/styles/global.css";
 import type { LinksFunction } from "@remix-run/node";
 import {
   Links,
@@ -8,6 +7,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
+import styles from "~/styles/global.css";
 
 export const links: LinksFunction = () => {
   return [
