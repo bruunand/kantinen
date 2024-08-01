@@ -8,17 +8,31 @@ export const getImageBackground = async (
   theme: Theme
 ) => {
   if (!meal) {
-    return null;
+    return { imageUrl: FALLBACK_IMAGE };
   }
   const date = getNextMealDate();
   const key = getCacheKey(date, theme);
-  const url = await getImageUrlForKey(key);
+  const url = await getImageUrlForKey(key).catch((error) => {
+    console.error(`Could not determine if an image already exists`, {
+      error,
+      key,
+    });
+    return FALLBACK_IMAGE;
+  });
 
   if (url) {
     console.log("Found an existing image", { key, url });
-    return url;
+    return { imageUrl: url };
   }
-  return await generateImageForMeal(key, meal, theme);
+
+  // The image generation job is NOT awaited - by design. We want to return the promise, and await it later.
+  const imageUrlJob = generateImageForMeal(key, meal, theme).catch((error) => {
+    console.error("Could not generate image", { error, key, meal });
+    return FALLBACK_IMAGE;
+  });
+  return {
+    imageUrlJob,
+  };
 };
 
 const getCacheKey = (date: Date, theme: Theme): string => {
@@ -26,3 +40,5 @@ const getCacheKey = (date: Date, theme: Theme): string => {
   const dateString = date.toISOString().split("T")[0];
   return `${theme}-${dateString}`;
 };
+
+const FALLBACK_IMAGE = "https://picsum.photos/id/292/1900/1300";

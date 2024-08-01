@@ -13,19 +13,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const theme = getThemeFromParams(request);
   const meals = await getCurrentMeals();
   const firstNonVeganMeal = meals.find((meal) => !meal.vegeratian);
-  const backgroundImageJob = getImageBackground(
+  const { imageUrl, imageUrlJob } = await getImageBackground(
     firstNonVeganMeal?.originalMealName,
     theme
-  ).catch((err) => {
-    console.error("Could not generate image", err);
-    return null;
-  });
+  );
 
-  return defer({ theme, meals, backgroundImageJob });
+  return defer({
+    theme,
+    meals,
+    backgroundImageUrl: imageUrl, // If we already have a cached image, use it immediately
+    backgroundImageJob: imageUrlJob, // If we need to generate, return a promise and await in client
+  });
 }
 
 export default function Index() {
-  const { theme, meals, backgroundImageJob } = useLoaderData<typeof loader>();
+  const { theme, meals, backgroundImageUrl, backgroundImageJob } =
+    useLoaderData<typeof loader>();
 
   return (
     <main>
@@ -52,17 +55,21 @@ export default function Index() {
             {meal.text}
           </p>
         ))}
-        <Suspense
-          fallback={<p className="loading-preview">Generating preview...</p>}
-        >
-          <Await resolve={backgroundImageJob}>
-            {(imageUrl) =>
-              typeof imageUrl === "string" ? (
-                <img src={imageUrl} className="background" />
-              ) : null
-            }
-          </Await>
-        </Suspense>
+        {backgroundImageUrl ? (
+          <img src={backgroundImageUrl} className="background" />
+        ) : backgroundImageJob ? (
+          <Suspense
+            fallback={<p className="loading-preview">Generating preview...</p>}
+          >
+            <Await resolve={backgroundImageJob}>
+              {(imageUrl) =>
+                typeof imageUrl === "string" ? (
+                  <img src={imageUrl} className="background lazy" />
+                ) : null
+              }
+            </Await>
+          </Suspense>
+        ) : null}
       </div>
     </main>
   );

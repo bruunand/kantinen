@@ -89,7 +89,9 @@ img.background {
   width: 100%;
   height: 100vh;
 
-  animation: fadeIn 2s;
+  &.lazy {
+    animation: fadeIn 2s;
+  }
 }
 
 .loading-preview {
