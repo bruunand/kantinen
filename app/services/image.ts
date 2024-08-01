@@ -18,10 +18,6 @@ export const getImageBackground = async (
     console.log("Found an existing image", { key, url });
     return url;
   }
-  if (theme === "neutral") {
-    console.error("skipping creating image for neutral theme");
-    return null;
-  }
   return await generateImageForMeal(key, meal, theme);
 };
 
