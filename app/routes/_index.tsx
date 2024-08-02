@@ -33,7 +33,6 @@ export default function Index() {
   return (
     <main>
       <nav>
-        <span>Theme</span>
         <Link to="/" className={theme === "neutral" ? "active" : ""}>
           ✨ Neutral
         </Link>
