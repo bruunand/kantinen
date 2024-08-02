@@ -56,25 +56,36 @@ nav a {
 
 .meal {
   color: white;
+  max-width: 90vw;
+  word-break: break-word;
 }
 .mainCourse {
   font-size: 3rem;
   margin: 0;
   font-weight: bolder;
   letter-spacing: 2px;
+  @media screen and (max-width: 600px) {
+    font-size: 2rem;
+  }
 }
 
 .vegetarianCourse {
   font-size: 2rem;
+  @media screen and (max-width: 600px) {
+    font-size: 1.5rem;
+  }
 }
 
 .centerWrapper {
   display: flex;
   flex-direction: column;
   justify-content: end;
+
   height: 100vh;
-  padding-left: 4rem;
-  padding-bottom: 4rem;
+  padding: 4rem;
+  @media screen and (max-width: 600px) {
+    padding: 1rem 1.5rem;
+  }
 }
 img.background {
   position: absolute;
