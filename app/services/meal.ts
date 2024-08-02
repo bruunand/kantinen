@@ -1,3 +1,4 @@
+import { getNextMealDate } from "./date";
 import { getNameForMeal } from "./meal-name";
 
 export const getCurrentMeals = async (): Promise<Meal[]> => {
@@ -19,18 +20,10 @@ export const getCurrentMeals = async (): Promise<Meal[]> => {
   });
 };
 
-const isPastLunch = (time: Date) => {
-  const hour = Number(time.toLocaleTimeString("da-DK", { hour: "numeric" }));
-  return hour >= 13;
-};
-
 const getDailyMenu = (menu: Menu): DailyMenu[] | undefined => {
-  let baseTime = new Date();
-  if (isPastLunch(baseTime)) {
-    baseTime.setUTCHours(baseTime.getHours() + 24);
-  }
+  const mealTime = getNextMealDate();
 
-  const dayOfWeek = baseTime
+  const dayOfWeek = mealTime
     .toLocaleDateString("da-DK", { weekday: "long" })
     .toLowerCase();
   return menu?.days.find((day) => day.dayOfWeek.toLowerCase() === dayOfWeek)

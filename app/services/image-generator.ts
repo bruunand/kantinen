@@ -1,21 +1,35 @@
 import { persistImageInCloud } from "./image-uploader";
+import { Theme } from "./theme";
 import { getRequiredEnv } from "./variables";
 
-export const generateImageForMeal = async (key: string, meal: string) => {
-  console.log("Generating a new image", { key, meal });
-  const prompt = generateImagePromptForMeal(meal);
+export const generateImageForMeal = async (
+  key: string,
+  meal: string,
+  theme: Theme
+) => {
+  console.log("Generating a new image", { key, meal, theme });
+  const prompt = generateImagePromptForMeal(meal, theme);
 
   const imageUrl = await generateImage(prompt);
   return await persistImageInCloud(key, imageUrl);
 };
 
-const generateImagePromptForMeal = (meal: string): string => {
-  return (
-    "Create a high-resolution image of a beautifully arranged meal on a stylish table setting. " +
-    `The scene should feature ${meal} on elegant plates, garnished with fresh herbs and colorful vegetables. ` +
-    "The background should be softly blurred to emphasize the food, with warm, natural lighting that highlights " +
-    "the textures and vibrant colors of the dishes. Include tasteful cutlery and a clean napkin, to complete the inviting and appetizing presentation."
-  );
+const generateImagePromptForMeal = (meal: string, theme: Theme): string => {
+  switch (theme) {
+    case "prison":
+      return (
+        "Create a high-resolution image of a prison meal. " +
+        `The scene should feature ${meal} on a plastic tray on a dirty plastic table. ` +
+        "The cutlery should be worn-out and dirty. The presentation should be uninviting."
+      );
+    default:
+      return (
+        "Create a high-resolution image of a beautifully arranged meal on a stylish table setting. " +
+        `The scene should feature ${meal} on elegant plates, garnished with fresh herbs and colorful vegetables. ` +
+        "The background should be softly blurred to emphasize the food, with warm, natural lighting that highlights " +
+        "the textures and vibrant colors of the dishes. Include tasteful cutlery and a clean napkin, to complete the inviting and appetizing presentation."
+      );
+  }
 };
 
 const generateImage = async (prompt: string): Promise<string> => {
