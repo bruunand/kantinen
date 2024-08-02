@@ -18,10 +18,9 @@ const generateImagePromptForMeal = (meal: string, theme: Theme): string => {
   switch (theme) {
     case "prison":
       return (
-        "Create a high-resolution image of a harshly presented meal on a cold, metallic table setting. " +
-        `The scene should feature ${meal} on dented, utilitarian trays, accompanied by plain, dull sides. ` +
-        "The background should be stark and desolate, with harsh, fluorescent lighting that casts sharp shadows and emphasizes " +
-        "the rough textures and muted colors of the food. Include basic, worn-out cutlery and a stained, rough napkin, to complete the bleak and uninviting presentation."
+        "Create a high-resolution image of a prison meal. " +
+        `The scene should feature ${meal} on a plastic tray on a dirty plastic table. ` +
+        "The cutlery should be worn-out and dirty. The presentation should be uninviting."
       );
     default:
       return (
