@@ -81,7 +81,7 @@ nav a {
   flex-direction: column;
   justify-content: end;
 
-  height: 100vh;
+  height: 100svh;
   padding: 4rem;
   @media screen and (max-width: 600px) {
     padding: 1rem 1.5rem;
@@ -98,7 +98,7 @@ img.background {
   z-index: -1;
   object-fit: cover;
   width: 100%;
-  height: 100vh;
+  height: 100lvh;
 
   &.lazy {
     animation: fadeIn 2s;
