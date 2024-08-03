@@ -55,7 +55,6 @@ nav a {
 }
 
 .meal {
-  color: white;
   max-width: 90vw;
   word-break: break-word;
 }
@@ -76,6 +75,13 @@ nav a {
   }
 }
 
+.meal-date {
+  font-size: 1rem;
+  font-weight: bold;
+  margin: 0;
+  text-transform: uppercase;
+}
+
 .centerWrapper {
   display: flex;
   flex-direction: column;
@@ -83,8 +89,15 @@ nav a {
 
   height: 100svh;
   padding: 4rem;
+
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+
   @media screen and (max-width: 600px) {
     padding: 1rem 1.5rem;
+  }
+  & hr {
+    width: 100%;
   }
 }
 img.background {
@@ -94,7 +107,7 @@ img.background {
   right: 0;
   margin-left: auto;
   margin-right: auto;
-  opacity: 0.5;
+  opacity: 0.6;
   z-index: -1;
   object-fit: cover;
   width: 100%;
