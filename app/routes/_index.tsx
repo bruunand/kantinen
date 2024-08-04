@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Await, defer, Link, useLoaderData } from "@remix-run/react";
 import { Suspense } from "react";
+import { getNextMealDate } from "~/services/date";
 import { getImageBackground } from "~/services/image";
 import { getCurrentMeals } from "~/services/meal";
 import { getThemeFromParams } from "~/services/theme";
@@ -10,6 +11,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const date = getNextMealDate();
   const theme = getThemeFromParams(request);
   const meals = await getCurrentMeals();
   const firstNonVeganMeal = meals.find((meal) => !meal.vegeratian);
@@ -21,13 +23,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
   return defer({
     theme,
     meals,
+    date,
     backgroundImageUrl: imageUrl, // If we already have a cached image, use it immediately
     backgroundImageJob: imageUrlJob, // If we need to generate, return a promise and await in client
   });
 }
 
 export default function Index() {
-  const { theme, meals, backgroundImageUrl, backgroundImageJob } =
+  const { theme, meals, date, backgroundImageUrl, backgroundImageJob } =
     useLoaderData<typeof loader>();
 
   return (
@@ -44,6 +47,14 @@ export default function Index() {
         </Link>
       </nav>
       <div className="centerWrapper">
+        <p className="meal-date">
+          {new Date(date).toLocaleDateString("da-DK", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+          })}
+        </p>
+        <hr />
         {meals.map((meal, index) => (
           <p
             key={index}
