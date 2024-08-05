@@ -111,7 +111,7 @@ img.background {
   z-index: -1;
   object-fit: cover;
   width: 100%;
-  height: 100lvh;
+  height: 100svh;
 
   &.lazy {
     animation: fadeIn 2s;
