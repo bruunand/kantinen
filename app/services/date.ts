@@ -11,8 +11,13 @@ export const getNextMealDate = () => {
 };
 
 const isPastLunch = (time: Date) => {
-  const hour = Number(time.toLocaleTimeString("da-DK", { hour: "numeric" }));
-  return hour >= 13;
+  const hour = Number(
+    time.toLocaleTimeString("da-DK", {
+      hour: "numeric",
+      timeZone: "Europe/Copenhagen",
+    })
+  );
+  return hour > 12 || (hour === 12 && time.getMinutes() >= 30);
 };
 
 const isWeekend = (time: Date) => {

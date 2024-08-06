@@ -25,6 +25,7 @@ const getEmoji = (meal: string) => {
         "hamburgerryg",
         "pork",
         "boller i karry",
+        "frikadelle",
       ],
       "🐷",
     ],
