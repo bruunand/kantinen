@@ -1,80 +1,99 @@
+import Replicate from "replicate";
 import { persistImageInCloud } from "./image-uploader";
 import { Theme } from "./theme";
 import { getRequiredEnv } from "./variables";
+
+const replicate = new Replicate({
+  auth: getRequiredEnv("REPLICATE_API_TOKEN"),
+});
 
 export const generateImageForMeal = async (
   key: string,
   meal: string,
   theme: Theme
 ) => {
-  console.log("Generating a new image", { key, meal, theme });
-  const prompt = generateImagePromptForMeal(meal, theme);
+  console.log("Generating prompt for a new image", { key, meal, theme });
+  const mealDescriptionPrompt = await generateTextPromptForMeal(meal, theme);
+  const mealDescription = await runTextPrompt(mealDescriptionPrompt);
+  console.log("Generating image with prompt", { prompt: mealDescription });
 
-  const imageUrl = await generateImage(prompt);
+  const imageUrl = await generateImage(mealDescription);
   return await persistImageInCloud(key, imageUrl);
 };
 
-const generateImagePromptForMeal = (meal: string, theme: Theme): string => {
+const generateTextPromptForMeal = async (
+  meal: string,
+  theme: Theme
+): Promise<string> => {
+  const base = `
+The image prompt needs the following key components in the description of the image.
+
+Subject: The main focus of the image.
+
+Style: The artistic approach or visual aesthetic.
+
+Composition: How elements are arranged within the frame.
+
+Lighting: The type and quality of light in the scene.
+
+Color Palette: The dominant colors or color scheme.
+
+Mood/Atmosphere: The emotional tone or ambiance of the image.
+
+Technical Details: Camera settings, perspective, or specific visual techniques.
+
+Additional Elements: Supporting details or background information.
+  `;
   switch (theme) {
+    case "neutral":
+      return `Write a description of the dish: "${meal}".
+      The description should be used for an image prompt.
+      The theme of the image is fine and high quality dining.
+     
+      ${base}`;
     case "prison":
-      return (
-        "Create a high-resolution image of a prison meal. " +
-        `The scene should feature ${meal} on a plastic tray on a dirty plastic table. ` +
-        "The cutlery should be worn-out and dirty. The presentation should be uninviting."
-      );
-    default:
-      return (
-        "Create a high-resolution image of a beautifully arranged meal on a stylish table setting. " +
-        `The scene should feature ${meal} on elegant plates, garnished with fresh herbs and colorful vegetables. ` +
-        "The background should be softly blurred to emphasize the food, with warm, natural lighting that highlights " +
-        "the textures and vibrant colors of the dishes. Include tasteful cutlery and a clean napkin, to complete the inviting and appetizing presentation."
-      );
+      return `Write a description of the dish: "${meal}".
+      The description should be used for an image prompt.
+      The theme of the image is food that is served in the prison.
+      ${base}`;
   }
 };
 
-const generateImage = async (prompt: string): Promise<string> => {
-  const resp = await fetch("https://api.limewire.com/api/image/generation", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Api-Version": "v1",
-      Accept: "application/json",
-      Authorization: `Bearer ${LIMEWIRE_API_KEY}`,
-    },
-    body: JSON.stringify({
+const runTextPrompt = async (prompt: string) => {
+  // https://replicate.com/meta/meta-llama-3-8b-instruct/api
+  const output = await replicate.run("meta/meta-llama-3-8b-instruct", {
+    input: {
       prompt,
-      aspect_ratio: "19:13",
-    }),
+      max_tokens: 1024,
+      prompt_template:
+        "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n{system_prompt}<|eot_id|><|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n",
+    },
+  });
+  if (typeof output === "string") {
+    return output;
+  }
+  if (Array.isArray(output)) {
+    return output.join("");
+  }
+  throw new Error("Invalid response from Replicate: " + typeof output);
+};
+
+const generateImage = async (prompt: string): Promise<string> => {
+  const output = await replicate.run("black-forest-labs/flux-schnell", {
+    input: {
+      prompt,
+      aspect_ratio: "3:2",
+      num_outputs: 1,
+    },
   });
 
-  const data = (await resp.json()) as LimewireCreateImageApiResponse;
-  if (data.status !== "COMPLETED") {
-    console.error("Limewire API call failed", data);
-    throw new Error("Image generation failed");
+  if (!Array.isArray(output)) {
+    throw new Error("Expected image url from image generator");
   }
-  const url = data.data[0]?.asset_url;
+
+  const url = output[0];
   if (!url) {
     throw new Error("Could not find generated image url");
   }
   return url;
 };
-
-const LIMEWIRE_API_KEY = getRequiredEnv("LIMEWIRE_API_KEY");
-
-interface LimewireCreateImageApiResponse {
-  id: string;
-  self: string; // "https://studio.limewire.com/request/296a972f-666a-44a1-a3df-c9c28a1f56c0";
-  status: string; // "COMPLETED";
-  credits_used: number;
-  credits_remaining: number;
-  data: [
-    {
-      asset_id: string;
-      self: string; // "https://studio.limewire.media/assets/116a972f-666a-44a1-a3df-c9c28a1f56c0";
-      asset_url: string;
-      type: "image/jpeg";
-      width: number;
-      height: number;
-    }
-  ];
-}
