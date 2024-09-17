@@ -45,6 +45,18 @@ export default function Index() {
         >
           🧟 Prison
         </Link>
+        <Link
+          to="/?theme=streetfood"
+          className={theme === "streetfood" ? "active" : ""}
+        >
+          🌯 Street Food
+        </Link>
+        <Link
+          to="/?theme=manga"
+          className={theme === "manga" ? "active" : ""}
+        >
+          🍜 Manga
+        </Link>
       </nav>
       <div className="centerWrapper">
         <p className="meal-date">

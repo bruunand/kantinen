@@ -10,6 +10,10 @@ const parseTheme = (theme: string | null) => {
   switch (theme) {
     case "prison":
       return theme;
+    case "streetfood":
+      return theme;
+    case "manga":
+      return theme;
     default:
       return "neutral";
   }
