@@ -8,6 +8,7 @@ cloudinary.config({
 });
 
 export const persistImageInCloud = async (key: string, imgUrl: string) => {
+  console.log("Caching image for future visits", { key, imgUrl });
   const uploadResult = await cloudinary.uploader.upload(imgUrl, {
     public_id: key,
     folder: "meals",

@@ -95,5 +95,6 @@ const generateImage = async (prompt: string): Promise<string> => {
   if (!url) {
     throw new Error("Could not find generated image url");
   }
+  console.log("Generated image", { url });
   return url;
 };
