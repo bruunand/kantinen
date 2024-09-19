@@ -37,9 +37,9 @@ export default function Index() {
     <main>
       <nav>
         <Form onChange={(event) => submit(event.currentTarget)}>
-          <select name="theme">
+          <select name="theme" defaultValue={theme}>
             {Themes.map(({ id, displayName }) => (
-              <option key={id} value={id} selected={theme === id}>
+              <option key={id} value={id}>
                 {displayName}
               </option>
             ))}
