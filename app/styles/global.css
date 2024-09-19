@@ -115,6 +115,7 @@ img.background {
   left: 10px;
   opacity: 0;
   animation: fadeIn 0s 2s forwards;
+  color: #000;
 }
 
 @keyframes fadeIn {
