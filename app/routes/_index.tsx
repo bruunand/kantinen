@@ -6,8 +6,12 @@ import { getImageBackground } from "~/services/image";
 import { getCurrentMeals } from "~/services/meal";
 import { getThemeFromParams, Themes } from "~/services/theme";
 
+export const config = {
+  maxDuration: 60,
+};
+
 export const meta: MetaFunction = () => {
-  return [{ title: "Kantinen - CWO Huset" }];
+  return [{ title: "Kantinen - CWO Huset"}];
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -37,9 +41,9 @@ export default function Index() {
     <main>
       <nav>
         <Form onChange={(event) => submit(event.currentTarget)}>
-          <select name="theme">
+          <select name="theme" defaultValue={theme}>
             {Themes.map(({ id, displayName }) => (
-              <option key={id} value={id} selected={theme === id}>
+              <option key={id} value={id}>
                 {displayName}
               </option>
             ))}
