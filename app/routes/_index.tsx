@@ -11,7 +11,7 @@ export const config = {
 };
 
 export const meta: MetaFunction = () => {
-  return [{ title: "Kantinen - CWO Huset"}];
+  return [{ title: "Kantinen - CWO Huset" }];
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
