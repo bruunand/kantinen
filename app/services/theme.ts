@@ -6,7 +6,7 @@ export const getThemeFromParams = (request: Request) => {
   }
   return parseTheme(theme);
 };
-const parseTheme = (theme: string | null) => {
+const parseTheme = (theme: string | null): Theme => {
   switch (theme) {
     case "prison":
       return theme;
@@ -15,4 +15,5 @@ const parseTheme = (theme: string | null) => {
   }
 };
 
-export type Theme = ReturnType<typeof getThemeFromParams>;
+export type Theme = (typeof Themes)[number];
+export const Themes = ["neutral", "prison"] as const;
