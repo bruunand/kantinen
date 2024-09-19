@@ -2,6 +2,7 @@ import { ActionFunctionArgs } from "@remix-run/node";
 import { getNextMealDate } from "~/services/date";
 import { getCacheKey } from "~/services/image";
 import { generateImageForMeal } from "~/services/image-generator";
+import { getImageUrlForKey } from "~/services/image-uploader";
 import { getCurrentMeals } from "~/services/meal";
 import { Themes } from "~/services/theme";
 import { getRequiredEnv } from "~/services/variables";
@@ -21,17 +22,32 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   if (!meal) {
     return new Response("No meals found", { status: 404 });
   }
+
+  const searchParams = new URL(request.url).searchParams;
+  const replaceExistingImages =
+    searchParams.get("force")?.toLowerCase() === "true";
+
   // Start the generation job, but don't await it (since we want this endpoint to respond early)
-  generateImagesForAllThemes(meal);
+  generateImagesForAllThemes(meal, replaceExistingImages);
   return new Response("OK", { status: 200 });
 };
 
-const generateImagesForAllThemes = async (meal: string) => {
+const generateImagesForAllThemes = async (
+  meal: string,
+  replaceExisting: boolean
+) => {
   const date = getNextMealDate();
 
   console.log("Generating images for meal", { meal, themes: Themes });
   Themes.forEach(async (theme) => {
     const key = getCacheKey(date, theme.id);
+
+    const imageFound = replaceExisting ? false : await getImageUrlForKey(key);
+    if (imageFound) {
+      console.log("Image already exists, skipping", { key });
+      return;
+    }
+
     generateImageForMeal(key, meal, theme.id).catch((error) =>
       console.error(
         "Could not generate image for meal on generate route",
