@@ -1,10 +1,10 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Await, defer, Link, useLoaderData } from "@remix-run/react";
+import { Await, defer, Form, useLoaderData, useSubmit } from "@remix-run/react";
 import { Suspense } from "react";
 import { getNextMealDate } from "~/services/date";
 import { getImageBackground } from "~/services/image";
 import { getCurrentMeals } from "~/services/meal";
-import { getThemeFromParams } from "~/services/theme";
+import { getThemeFromParams, Themes } from "~/services/theme";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Kantinen - CWO Huset" }];
@@ -32,19 +32,19 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function Index() {
   const { theme, meals, date, backgroundImageUrl, backgroundImageJob } =
     useLoaderData<typeof loader>();
-
+  const submit = useSubmit();
   return (
     <main>
       <nav>
-        <Link to="/" className={theme === "neutral" ? "active" : ""}>
-          ✨ Neutral
-        </Link>
-        <Link
-          to="/?theme=prison"
-          className={theme === "prison" ? "active" : ""}
-        >
-          🧟 Prison
-        </Link>
+        <Form onChange={(event) => submit(event.currentTarget)}>
+          <select name="theme">
+            {Themes.map(({ id, displayName }) => (
+              <option key={id} value={id} selected={theme === id}>
+                {displayName}
+              </option>
+            ))}
+          </select>
+        </Form>
       </nav>
       <div className="centerWrapper">
         <p className="meal-date">

@@ -31,8 +31,8 @@ const generateImagesForAllThemes = async (meal: string) => {
 
   console.log("Generating images for meal", { meal, themes: Themes });
   Themes.forEach(async (theme) => {
-    const key = getCacheKey(date, theme);
-    generateImageForMeal(key, meal, theme).catch((error) =>
+    const key = getCacheKey(date, theme.id);
+    generateImageForMeal(key, meal, theme.id).catch((error) =>
       console.error(
         "Could not generate image for meal on generate route",
         error

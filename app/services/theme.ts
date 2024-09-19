@@ -1,19 +1,16 @@
 export const getThemeFromParams = (request: Request) => {
   const { searchParams } = new URL(request.url);
   const theme = searchParams.get("theme");
-  if (!theme) {
-    searchParams.delete("theme");
-  }
   return parseTheme(theme);
 };
 const parseTheme = (theme: string | null): Theme => {
-  switch (theme) {
-    case "prison":
-      return theme;
-    default:
-      return "neutral";
-  }
+  return Themes.find((t) => t.id === theme)?.id ?? "neutral";
 };
 
-export type Theme = (typeof Themes)[number];
-export const Themes = ["neutral", "prison"] as const;
+export type Theme = (typeof Themes)[number]["id"];
+export const Themes = [
+  { id: "neutral", displayName: "✨ Neutral" },
+  { id: "prison", displayName: "🧟 Prison" },
+  { id: "streetfood", displayName: "🌯 Street Food" },
+  { id: "manga", displayName: "🍜 Manga" },
+] as const;
