@@ -6,10 +6,6 @@ import { getImageBackground } from "~/services/image";
 import { getCurrentMeals } from "~/services/meal";
 import { getThemeFromParams, Themes } from "~/services/theme";
 
-export const config = {
-  maxDuration: 60,
-};
-
 export const meta: MetaFunction = () => {
   return [{ title: "Kantinen - CWO Huset" }];
 };
