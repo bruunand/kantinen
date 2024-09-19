@@ -25,37 +25,14 @@ const generateTextPromptForMeal = async (
   meal: string,
   theme: Theme
 ): Promise<string> => {
-  const base = `
-The image prompt needs the following key components in the description of the image.
-
-Subject: The main focus of the image.
-
-Style: The artistic approach or visual aesthetic.
-
-Composition: How elements are arranged within the frame.
-
-Lighting: The type and quality of light in the scene.
-
-Color Palette: The dominant colors or color scheme.
-
-Mood/Atmosphere: The emotional tone or ambiance of the image.
-
-Technical Details: Camera settings, perspective, or specific visual techniques.
-
-Additional Elements: Supporting details or background information.
-  `;
+  
   switch (theme) {
     case "neutral":
       return `Write a description of the dish: "${meal}".
-      The description should be used for an image prompt.
-      The theme of the image is fine and high quality dining.
-     
-      ${base}`;
+      The theme of the image is fine and high quality dining.`;
     case "prison":
       return `Write a description of the dish: "${meal}".
-      The description should be used for an image prompt.
-      The theme of the image is food that is served in the prison.
-      ${base}`;
+      The food is served in the prison on a worn out metal tray`;
   }
 };
 
