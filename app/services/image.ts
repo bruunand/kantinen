@@ -1,15 +1,8 @@
 import { getNextMealDate } from "./date";
-import { generateImageForMeal } from "./image-generator";
 import { getImageUrlForKey } from "./image-uploader";
 import { Theme } from "./theme";
 
-export const getImageBackground = async (
-  meal: string | undefined,
-  theme: Theme
-) => {
-  if (!meal) {
-    return { imageUrl: FALLBACK_IMAGE };
-  }
+export const getImageBackground = async (theme: Theme) => {
   const date = getNextMealDate();
   const key = getCacheKey(date, theme);
   const url = await getImageUrlForKey(key).catch((error) => {
@@ -20,20 +13,11 @@ export const getImageBackground = async (
     return FALLBACK_IMAGE;
   });
 
-  if (url) {
-    console.log("Found an existing image", { key, url });
-    return { imageUrl: url };
-  }
-
-  // The image generation job is NOT awaited - by design. We want to return the promise, and await it later.
-  // Once the "generate" route has matured and has been validated, remove this part and always return fallback image if we get to here
-  const imageUrlJob = generateImageForMeal(key, meal, theme).catch((error) => {
-    console.error("Could not generate image", { error, key, meal });
+  if (!url) {
+    console.warn("No image background found... using fallback image");
     return FALLBACK_IMAGE;
-  });
-  return {
-    imageUrlJob,
-  };
+  }
+  return url;
 };
 
 export const getCacheKey = (date: Date, theme: Theme): string => {

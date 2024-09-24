@@ -1,6 +1,5 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Await, defer, Form, useLoaderData, useSubmit } from "@remix-run/react";
-import { Suspense } from "react";
+import { defer, Form, useLoaderData, useSubmit } from "@remix-run/react";
 import { getNextMealDate } from "~/services/date";
 import { getImageBackground } from "~/services/image";
 import { getCurrentMeals } from "~/services/meal";
@@ -13,24 +12,16 @@ export const meta: MetaFunction = () => {
 export async function loader({ request }: LoaderFunctionArgs) {
   const date = getNextMealDate();
   const theme = getThemeFromParams(request);
-  const meals = await getCurrentMeals();
-  const firstNonVeganMeal = meals.find((meal) => !meal.vegeratian);
-  const { imageUrl, imageUrlJob } = await getImageBackground(
-    firstNonVeganMeal?.originalMealName,
-    theme
-  );
+  const [meals, backgroundImageUrl] = await Promise.all([
+    getCurrentMeals(),
+    getImageBackground(theme),
+  ]);
 
-  return defer({
-    theme,
-    meals,
-    date,
-    backgroundImageUrl: imageUrl, // If we already have a cached image, use it immediately
-    backgroundImageJob: imageUrlJob, // If we need to generate, return a promise and await in client
-  });
+  return defer({ theme, meals, date, backgroundImageUrl });
 }
 
 export default function Index() {
-  const { theme, meals, date, backgroundImageUrl, backgroundImageJob } =
+  const { theme, meals, date, backgroundImageUrl } =
     useLoaderData<typeof loader>();
   const submit = useSubmit();
   return (
@@ -65,21 +56,7 @@ export default function Index() {
             {meal.text}
           </p>
         ))}
-        {backgroundImageUrl ? (
-          <img src={backgroundImageUrl} className="background" />
-        ) : backgroundImageJob ? (
-          <Suspense
-            fallback={<p className="loading-preview">Generating preview...</p>}
-          >
-            <Await resolve={backgroundImageJob}>
-              {(imageUrl) =>
-                typeof imageUrl === "string" ? (
-                  <img src={imageUrl} className="background lazy" />
-                ) : null
-              }
-            </Await>
-          </Suspense>
-        ) : null}
+        <img src={backgroundImageUrl} className="background" />
       </div>
     </main>
   );
