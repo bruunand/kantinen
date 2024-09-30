@@ -27,8 +27,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const replaceExistingImages =
     searchParams.get("force")?.toLowerCase() === "true";
 
-  // Start the generation job, but don't await it (since we want this endpoint to respond early)
-  generateImagesForAllThemes(meal, replaceExistingImages);
+  await generateImagesForAllThemes(meal, replaceExistingImages);
+
   return new Response("OK", { status: 200 });
 };
 
@@ -39,20 +39,24 @@ const generateImagesForAllThemes = async (
   const date = getNextMealDate();
 
   console.log("Generating images for meal", { meal, themes: Themes });
-  Themes.forEach(async (theme) => {
-    const key = getCacheKey(date, theme.id);
 
+  const promises = Themes.map(async (theme) => {
+    const key = getCacheKey(date, theme.id);
+  
     const imageFound = replaceExisting ? false : await getImageUrlForKey(key);
     if (imageFound) {
       console.log("Image already exists, skipping", { key });
+
       return;
     }
-
-    generateImageForMeal(key, meal, theme.id).catch((error) =>
+  
+    return generateImageForMeal(key, meal, theme.id).catch((error) =>
       console.error(
         "Could not generate image for meal on generate route",
         error
       )
     );
   });
+  
+  await Promise.all(promises);
 };
