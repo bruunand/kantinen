@@ -8,13 +8,13 @@ import { Themes } from "~/services/theme";
 import { getRequiredEnv } from "~/services/variables";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  /*const authToken = request.headers.get("Authorization");
+  const authToken = request.headers.get("Authorization");
   if (!authToken) {
     return new Response("Unauthorized", { status: 401 });
   }
   if (authToken !== getRequiredEnv("GENERATE_ENDPOINT_TOKEN")) {
     return new Response("Unauthorized", { status: 403 });
-  }*/
+  }
 
   const meals = await getCurrentMeals();
   const firstNonVeganMeal = meals.find((meal) => !meal.vegeratian);
