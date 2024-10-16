@@ -67,11 +67,9 @@ Additional Elements: Supporting details or background information.
       The image should be a 3 frame manga drawing in colour, the first frame shows the food, the second frame a character eating the food and the third frame shows the same character being amazed by the flavour. The frames may overlap.
       ${base}`;
     case "sweatshop": 
-      return `Write a description of the dish: "${meal}".
-      The description should be used for an image prompt.
-      The theme of the image is a busy sweatshop focused on software engineering.
-      The image should include a group of people working on computers in a dimly lit room.
-      ${base}`;
+      return `Write a description of the dish "${meal}" to be used as an image prompt.
+      The setting of the image is a busy sweatshop focused on software engineering.
+      The image should include a group of disgruntled employees working on computers in a dimly lit room.`;
   }
 };
 
