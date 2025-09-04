@@ -25,27 +25,27 @@ const generateTextPromptForMeal = async (
   meal: string,
   theme: Theme
 ): Promise<string> => {
-  const baseStyle = "Ensure professional food photography, high detail, high creativity, photorealistic, appetizing aesthetics. Respond only with the prompt.";
-  const promptPrefix = `Create a highly detailed image description for AI generation of the meal "${meal}"`;
+  const promptPrefix = `Create an image description for AI generation of the meal "${meal}"`;
+  const promptPostfix = "Be creative and highly detailed. Respond ONLY with the description.";
 
   switch (theme) {
     case "neutral":
-      return `${promptPrefix}: Nordic minimalist restaurant setting. Clean white surfaces, natural lighting, shallow depth of field, elegant plating. ${baseStyle}`;
+      return `${promptPrefix}: Photorealistic. Nordic minimalist restaurant setting. Clean white surfaces, natural lighting, shallow depth of field, elegant plating. ${promptPostfix}`;
 
     case "prison":
-      return `${promptPrefix}: Institutional cafeteria. Stainless steel tray, fluorescent lighting, basic portions, utilitarian presentation. ${baseStyle}`;
+      return `${promptPrefix}: Photorealistic. Maximum security cafeteria. Stainless steel tray, fluorescent lighting, basic portions, utilitarian presentation. ${promptPostfix}`;
 
     case "streetfood":
-      return `${promptPrefix}: Evening food market scene. Golden hour lighting, food cart setting, steam rising, paper wrapping, vibrant street atmosphere. ${baseStyle}`;
+      return `${promptPrefix}: Photorealistic. Evening food market scene. Golden hour lighting, food cart setting, steam rising, paper wrapping, vibrant street atmosphere. ${promptPostfix}`;
 
     case "manga":
-      return `${promptPrefix}: Manga/anime art style. Three-panel composition: close-up of food, character taking bite with surprised expression, explosive flavor reaction. Bold colors, speed lines, exaggerated effects. ${baseStyle}`;
+      return `${promptPrefix}: Manga/anime art style. Character taking bite with surprised expression. Bold colors, speed lines, exaggerated effects. ${promptPostfix}`;
 
     case "sweatshop":
-      return `${promptPrefix}: Late-night office setting. Glowing computer monitors, desk with coding equipment, Monster energy cans, tired developer atmosphere, blue screen glow mixed with warm desk lamps. ${baseStyle}`;
+      return `${promptPrefix}: Photorealistic. Late-night office setting. Glowing computer monitors, desk with RGB coding equipment, Monster energy cans, tired developer atmosphere, blue screen glow mixed with warm desk lamps. ${promptPostfix}`;
 
     case "cyberpunk":
-      return `${promptPrefix}: Cyberpunk restaurant. Neon lighting (pink, blue, green), chrome surfaces, holographic displays, rain-streaked windows, synthetic ingredients, high-tech dystopian atmosphere. ${baseStyle}`;
+      return `${promptPrefix}: Cyberpunk restaurant. Neon lighting (pink, blue, green), chrome surfaces, holographic displays, rain-streaked windows, synthetic ingredients, high-tech dystopian atmosphere. ${promptPostfix}`;
 
     default:
       throw new Error(`Unsupported theme: ${theme}`);
@@ -72,10 +72,12 @@ const runTextPrompt = async (prompt: string) => {
 };
 
 const generateImage = async (prompt: string): Promise<string> => {
-  const output = await replicate.run("bytedance/seedream-3", {
+  let output = await replicate.run("black-forest-labs/flux-schnell", {
     input: {
       prompt,
       aspect_ratio: "16:9",
+      output_quality: 100,
+      output_format: "jpg",
       num_outputs: 1,
     },
   });
