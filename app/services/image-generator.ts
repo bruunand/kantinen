@@ -108,6 +108,8 @@ const generateImage = async (prompt: string): Promise<Buffer> => {
     },
   });
 
+  console.log("Image generation output type", { type: typeof output });
+  
   if (!(output instanceof ReadableStream)) {
     throw new Error("Expected ReadableStream from image generator");
   }
