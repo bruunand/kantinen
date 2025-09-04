@@ -84,6 +84,10 @@ const generateImage = async (prompt: string): Promise<string> => {
 
   console.log(output);
 
+  if (Array.isArray(output)) {
+    output = output[0];
+  }
+  
   if (typeof output !== "string") {
     throw new Error("Expected image url from image generator");
   }
