@@ -7,15 +7,12 @@ cloudinary.config({
   api_secret: getRequiredEnv("CLOUDINARY_API_SECRET"),
 });
 
-export const persistImageInCloud = async (key: string, imageBuffer: Buffer) => {
-  console.log("Caching image for future visits", { key });
-  const uploadResult = await cloudinary.uploader.upload(
-    `data:image/png;base64,${imageBuffer.toString('base64')}`,
-    {
-      public_id: key,
-      folder: "meals",
-    }
-  );
+export const persistImageInCloud = async (key: string, imgUrl: string) => {
+  console.log("Caching image for future visits", { key, imgUrl });
+  const uploadResult = await cloudinary.uploader.upload(imgUrl, {
+    public_id: key,
+    folder: "meals",
+  });
 
   return uploadResult.url;
 };

@@ -17,8 +17,8 @@ export const generateImageForMeal = async (
   const mealDescription = await runTextPrompt(mealDescriptionPrompt);
   console.log("Generating image with prompt", { prompt: mealDescription });
 
-  const imageBuffer = await generateImage(mealDescription);
-  return await persistImageInCloud(key, imageBuffer);
+  const imageUrl = await generateImage(mealDescription);
+  return await persistImageInCloud(key, imageUrl);
 };
 
 const generateTextPromptForMeal = async (
@@ -43,16 +43,12 @@ Mood/Atmosphere: The emotional tone or ambiance of the image.
 Technical Details: Camera settings, perspective, or specific visual techniques.
 
 Additional Elements: Supporting details or background information.
-
-The image should be as realistic as possible, with a high level of detail and texture.
-
-Avoid including any text in the image.
   `;
   switch (theme) {
     case "neutral":
       return `Write a description of the dish: "${meal}".
       The description should be used for an image prompt.
-      The theme of the image is fine and high quality dining, set in a Scandinavian restaurant.
+      The theme of the image is fine and high quality dining.
      
       ${base}`;
     case "prison":
@@ -70,13 +66,10 @@ Avoid including any text in the image.
       The description should be used for an image prompt.
       The image should be a 3 frame manga drawing in colour, the first frame shows the food, the second frame a character eating the food and the third frame shows the same character being amazed by the flavour. The frames may overlap.
       ${base}`;
-    case "sweatshop":
+    case "sweatshop": 
       return `Write a description of the dish "${meal}" to be used as an image prompt.
-      The setting of the image is a dark office focused on software engineering.
-      The image should include a group of hard working employees working on computers.
-      Cans of White Monster energy drink should be visible on the desks.`;
-    default:
-      throw new Error(`Unsupported theme: ${theme}`);
+      The setting of the image is a busy sweatshop focused on software engineering.
+      The image should include a group of disgruntled employees working on computers in a dimly lit room.`;
   }
 };
 
@@ -99,8 +92,8 @@ const runTextPrompt = async (prompt: string) => {
   throw new Error("Invalid response from Replicate: " + typeof output);
 };
 
-const generateImage = async (prompt: string): Promise<Buffer> => {
-  const output = await replicate.run("ideogram-ai/ideogram-v3-turbo", {
+const generateImage = async (prompt: string): Promise<string> => {
+  const output = await replicate.run("google/nano-banana", {
     input: {
       prompt,
       aspect_ratio: "3:2",
@@ -108,28 +101,11 @@ const generateImage = async (prompt: string): Promise<Buffer> => {
     },
   });
 
-  console.log("Image generation output type", { type: typeof output });
-  
-  if (!(output instanceof ReadableStream)) {
-    throw new Error("Expected ReadableStream from image generator");
+  console.log(output);
+
+  if (typeof output !== "string") {
+    throw new Error("Expected image url from image generator");
   }
 
-  // Convert ReadableStream to Buffer
-  const reader = output.getReader();
-  const chunks: Uint8Array[] = [];
-  
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-  } finally {
-    reader.releaseLock();
-  }
-  
-  const buffer = Buffer.concat(chunks);
-  console.log("Generated image buffer", { size: buffer.length });
-  
-  return buffer;
+  return output;
 };
