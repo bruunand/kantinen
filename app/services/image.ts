@@ -23,7 +23,7 @@ export const getImageBackground = async (theme: Theme) => {
 export const getCacheKey = (date: Date, theme: Theme): string => {
   // Convert Date object into ISO Date string (no timestamp) (example: 2024-07-31)
   const dateString = date.toISOString().split("T")[0];
-  return `ideogram-turbo-${theme}-${dateString}`;
+  return `nano-banana-${theme}-${dateString}`;
 };
 
 const FALLBACK_IMAGE = "https://picsum.photos/id/292/1900/1300";

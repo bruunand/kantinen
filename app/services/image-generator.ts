@@ -25,56 +25,28 @@ const generateTextPromptForMeal = async (
   meal: string,
   theme: Theme
 ): Promise<string> => {
-  const base = `
-The image prompt needs the following key components in the description of the image.
+  const baseStyle = "Ensure professional food photography, high detail, photorealistic, appetizing aesthetics. Respond only with the prompt.";
+  const promptPrefix = `Create a highly detailed image description for AI generation of the meal "${meal}"`;
 
-Subject: The main focus of the image.
-
-Style: The artistic approach or visual aesthetic.
-
-Composition: How elements are arranged within the frame.
-
-Lighting: The type and quality of light in the scene.
-
-Color Palette: The dominant colors or color scheme.
-
-Mood/Atmosphere: The emotional tone or ambiance of the image.
-
-Technical Details: Camera settings, perspective, or specific visual techniques.
-
-Additional Elements: Supporting details or background information.
-
-The image should be as realistic as possible, with a high level of detail and texture.
-
-Avoid including any text in the image.
-  `;
   switch (theme) {
     case "neutral":
-      return `Write a description of the dish: "${meal}".
-      The description should be used for an image prompt.
-      The theme of the image is fine and high quality dining, set in a Scandinavian restaurant.
-     
-      ${base}`;
+      return `${promptPrefix}. Nordic minimalist restaurant setting. Clean white surfaces, natural lighting, shallow depth of field, elegant plating. ${baseStyle}`;
+
     case "prison":
-      return `Write a description of the dish: "${meal}".
-      The description should be used for an image prompt.
-      The theme of the image is food that is served in the prison.
-      ${base}`;
+      return `${promptPrefix}. Institutional cafeteria. Stainless steel tray, fluorescent lighting, basic portions, utilitarian presentation. ${baseStyle}`;
+
     case "streetfood":
-      return `Write a description of the dish: "${meal}".
-      The description should be used for an image prompt.
-      The theme of the image is a festive outdoor street food scene in the evening.
-      ${base}`;
+      return `${promptPrefix}. Evening food market scene. Golden hour lighting, food cart setting, steam rising, paper wrapping, vibrant street atmosphere. ${baseStyle}`;
+
     case "manga":
-      return `Write a description of the dish: "${meal}".
-      The description should be used for an image prompt.
-      The image should be a 3 frame manga drawing in colour, the first frame shows the food, the second frame a character eating the food and the third frame shows the same character being amazed by the flavour. The frames may overlap.
-      ${base}`;
+      return `${promptPrefix}. Manga/anime art style. Three-panel composition: extreme close-up of food, character taking bite with surprised expression, explosive flavor reaction. Bold colors, speed lines, exaggerated effects`;
+
     case "sweatshop":
-      return `Write a description of the dish "${meal}" to be used as an image prompt.
-      The setting of the image is a dark office focused on software engineering.
-      The image should include a group of hard working employees working on computers.
-      Cans of White Monster energy drink should be visible on the desks.`;
+      return `${promptPrefix}. Late-night office setting. Glowing computer monitors, desk with coding equipment, White Monster energy cans, tired developer atmosphere, blue screen glow mixed with warm desk lamps. ${baseStyle}`;
+
+    case "cyberpunk":
+      return `${promptPrefix}. Cyberpunk restaurant. Neon lighting (pink, blue, green), chrome surfaces, holographic displays, rain-streaked windows, synthetic ingredients, high-tech dystopian atmosphere. ${baseStyle}`;
+
     default:
       throw new Error(`Unsupported theme: ${theme}`);
   }
@@ -100,7 +72,7 @@ const runTextPrompt = async (prompt: string) => {
 };
 
 const generateImage = async (prompt: string): Promise<string> => {
-  const output = await replicate.run("ideogram-ai/ideogram-v3-turbo", {
+  const output = await replicate.run("google/nano-banana", {
     input: {
       prompt,
       aspect_ratio: "16:9",
