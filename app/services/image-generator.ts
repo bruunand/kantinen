@@ -75,7 +75,7 @@ Additional Elements: Supporting details or background information.
 
 const runTextPrompt = async (prompt: string) => {
   // https://replicate.com/meta/meta-llama-3-8b-instruct/api
-  const output = await replicate.run("meta/meta-llama-3-8b-instruct", {
+  const output = await replicate.run("openai/gpt-5-nano", {
     input: {
       prompt,
       max_tokens: 1024,
@@ -93,7 +93,7 @@ const runTextPrompt = async (prompt: string) => {
 };
 
 const generateImage = async (prompt: string): Promise<string> => {
-  const output = await replicate.run("black-forest-labs/flux-schnell", {
+  const output = await replicate.run("google/nano-banana", {
     input: {
       prompt,
       aspect_ratio: "3:2",
