@@ -25,27 +25,27 @@ const generateTextPromptForMeal = async (
   meal: string,
   theme: Theme
 ): Promise<string> => {
-  const baseStyle = "Ensure professional food photography, high detail, photorealistic, appetizing aesthetics. Respond only with the prompt.";
+  const baseStyle = "Ensure professional food photography, high detail, high creativity, photorealistic, appetizing aesthetics. Respond only with the prompt.";
   const promptPrefix = `Create a highly detailed image description for AI generation of the meal "${meal}"`;
 
   switch (theme) {
     case "neutral":
-      return `${promptPrefix}. Nordic minimalist restaurant setting. Clean white surfaces, natural lighting, shallow depth of field, elegant plating. ${baseStyle}`;
+      return `${promptPrefix}: Nordic minimalist restaurant setting. Clean white surfaces, natural lighting, shallow depth of field, elegant plating. ${baseStyle}`;
 
     case "prison":
-      return `${promptPrefix}. Institutional cafeteria. Stainless steel tray, fluorescent lighting, basic portions, utilitarian presentation. ${baseStyle}`;
+      return `${promptPrefix}: Institutional cafeteria. Stainless steel tray, fluorescent lighting, basic portions, utilitarian presentation. ${baseStyle}`;
 
     case "streetfood":
-      return `${promptPrefix}. Evening food market scene. Golden hour lighting, food cart setting, steam rising, paper wrapping, vibrant street atmosphere. ${baseStyle}`;
+      return `${promptPrefix}: Evening food market scene. Golden hour lighting, food cart setting, steam rising, paper wrapping, vibrant street atmosphere. ${baseStyle}`;
 
     case "manga":
-      return `${promptPrefix}. Manga/anime art style. Three-panel composition: extreme close-up of food, character taking bite with surprised expression, explosive flavor reaction. Bold colors, speed lines, exaggerated effects`;
+      return `${promptPrefix}: Manga/anime art style. Three-panel composition: close-up of food, character taking bite with surprised expression, explosive flavor reaction. Bold colors, speed lines, exaggerated effects. ${baseStyle}`;
 
     case "sweatshop":
-      return `${promptPrefix}. Late-night office setting. Glowing computer monitors, desk with coding equipment, White Monster energy cans, tired developer atmosphere, blue screen glow mixed with warm desk lamps. ${baseStyle}`;
+      return `${promptPrefix}: Late-night office setting. Glowing computer monitors, desk with coding equipment, Monster energy cans, tired developer atmosphere, blue screen glow mixed with warm desk lamps. ${baseStyle}`;
 
     case "cyberpunk":
-      return `${promptPrefix}. Cyberpunk restaurant. Neon lighting (pink, blue, green), chrome surfaces, holographic displays, rain-streaked windows, synthetic ingredients, high-tech dystopian atmosphere. ${baseStyle}`;
+      return `${promptPrefix}: Cyberpunk restaurant. Neon lighting (pink, blue, green), chrome surfaces, holographic displays, rain-streaked windows, synthetic ingredients, high-tech dystopian atmosphere. ${baseStyle}`;
 
     default:
       throw new Error(`Unsupported theme: ${theme}`);
@@ -72,7 +72,7 @@ const runTextPrompt = async (prompt: string) => {
 };
 
 const generateImage = async (prompt: string): Promise<string> => {
-  const output = await replicate.run("google/nano-banana", {
+  const output = await replicate.run("bytedance/seedream-3", {
     input: {
       prompt,
       aspect_ratio: "16:9",
