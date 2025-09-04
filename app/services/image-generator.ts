@@ -96,7 +96,7 @@ const generateImage = async (prompt: string): Promise<string> => {
   const output = await replicate.run("ideogram-ai/ideogram-v3-turbo", {
     input: {
       prompt,
-      aspect_ratio: "3:2",
+      aspect_ratio: "16:9",
       num_outputs: 1,
     },
   });
