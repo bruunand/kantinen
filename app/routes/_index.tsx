@@ -27,8 +27,8 @@ export default function Index() {
   return (
     <main>
       <nav>
-        <Form onChange={(event) => submit(event.currentTarget)}>
-          <select name="theme" defaultValue={theme}>
+        <Form onChange={(event) => submit(event.currentTarget)} autoComplete="off">
+          <select name="theme" value={theme} onChange={() => {}}>
             {Themes.map(({ id, displayName }) => (
               <option key={id} value={id}>
                 {displayName}
