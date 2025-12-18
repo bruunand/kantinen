@@ -28,6 +28,7 @@ export default function Index() {
     <main>
       <nav>
         <Form onChange={(event) => submit(event.currentTarget)} autoComplete="off">
+          {/* onChange is required for controlled select; actual submission is handled by Form's onChange */}
           <select name="theme" value={theme} onChange={() => {}}>
             {Themes.map(({ id, displayName }) => (
               <option key={id} value={id}>
