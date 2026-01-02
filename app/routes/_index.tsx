@@ -1,5 +1,5 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { defer, Form, useLoaderData, useSubmit } from "@remix-run/react";
+import type { LoaderFunctionArgs, MetaFunction } from "react-router";
+import { Form, useLoaderData, useSubmit } from "react-router";
 import { getNextMealDate } from "~/services/date";
 import { getImageBackground } from "~/services/image";
 import { getCurrentMeals } from "~/services/meal";
@@ -17,7 +17,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     getImageBackground(theme),
   ]);
 
-  return defer({ theme, meals, date, backgroundImageUrl });
+  return { theme, meals, date, backgroundImageUrl };
 }
 
 export default function Index() {
