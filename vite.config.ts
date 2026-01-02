@@ -8,10 +8,5 @@ export default defineConfig({
       "~": path.resolve(__dirname, "app"),
     },
   },
-  plugins: [
-    reactRouter({
-      // Enable file-based routing (flat routes)
-      ssr: true,
-    }),
-  ],
+  plugins: [reactRouter()],
 });
