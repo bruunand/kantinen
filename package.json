@@ -6,7 +6,7 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
+    "start": "react-router-serve ./build/server/nodejs_eyJydW50aW1lIjoibm9kZWpzIn0/index.js",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -25,6 +25,7 @@
     "@types/node": "^25.0.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@vercel/react-router": "^1.2.4",
     "eslint": "^8.38.0",
     "typescript": "^5.5.4",
     "vite": "^7.3.0"
