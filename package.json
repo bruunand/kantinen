@@ -10,6 +10,8 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@react-router/node": "^7.11.0",
+    "@react-router/serve": "^7.11.0",
     "cloudinary": "^2.4.0",
     "isbot": "^4.0.0",
     "react": "^19.0.0",
@@ -20,8 +22,6 @@
   "devDependencies": {
     "@react-router/dev": "^7.11.0",
     "@react-router/fs-routes": "^7.11.0",
-    "@react-router/node": "^7.11.0",
-    "@react-router/serve": "^7.11.0",
     "@types/node": "^25.0.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
