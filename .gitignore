@@ -1,5 +1,7 @@
 node_modules/
 .cache/
+.react-router/
+.vercel/
 public/build/
 build/
 .env

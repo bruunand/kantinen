@@ -1,4 +1,4 @@
-import { ActionFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs } from "react-router";
 import { getNextMealDate } from "~/services/date";
 import { getCacheKey } from "~/services/image";
 import { generateImageForMeal } from "~/services/image-generator";
