@@ -14,25 +14,12 @@ export const generateImageForMeal = async (
   meal: string,
   theme: Theme
 ) => {
-  console.log("Generating prompt for a new image", { key, meal, theme });
-  const mealDescription = await runTextPrompt(
-    generateTextPromptForMeal(meal, theme)
-  );
-  console.log("Generating image with prompt", { prompt: mealDescription });
+  const prompt = buildImagePrompt(meal, theme);
+  console.log("Generating image with prompt", { key, meal, theme, prompt });
 
-  const imageUrl = await generateImage(mealDescription);
+  const imageUrl = await generateImage(prompt);
   return await persistImageInCloud(key, imageUrl);
 };
-
-const PROMPT_WRITER_SYSTEM_PROMPT = `You write prompts for a text-to-image model.
-Given a meal and a style brief, respond with a single image prompt in English as one flowing paragraph.
-
-Rules:
-- The dish is the hero: name its actual components and describe their colors, textures and plating so the food is instantly recognizable. Do not invent components the meal name doesn't imply.
-- Meal names may be in Danish; translate them and depict the dish faithfully.
-- Composition: one plated serving as the clear focal point, seen from a natural three-quarter angle, with the frame wide enough that the surrounding setting and its props stay clearly visible around and behind the dish.
-- Weave in every element of the style brief (setting, props, lighting, mood, medium) and let its mood win: a bleak brief means bleak, carelessly served food; an inviting brief means steam, gloss and fresh color.
-- Respond ONLY with the prompt, no quotes or preamble.`;
 
 const themeStyleBriefs: Record<Theme, string> = {
   neutral:
@@ -48,29 +35,12 @@ const themeStyleBriefs: Record<Theme, string> = {
     "Photorealistic. Late-night developer den: meal balanced next to an RGB mechanical keyboard on a cluttered desk, glow of code-filled monitors, crushed Monster energy drink cans, tangled cables, cold blue screen light mixed with a warm desk lamp, crunch-time atmosphere.",
 };
 
-const generateTextPromptForMeal = (meal: string, theme: Theme): string => {
+const buildImagePrompt = (meal: string, theme: Theme): string => {
   const styleBrief = themeStyleBriefs[theme];
   if (!styleBrief) {
     throw new Error(`Unsupported theme: ${theme}`);
   }
-  return `Meal: "${meal}"\nStyle brief: ${styleBrief}`;
-};
-
-const runTextPrompt = async (prompt: string) => {
-  // https://replicate.com/openai/gpt-5-mini/api
-  const output = await replicate.run("openai/gpt-5-mini", {
-    input: {
-      prompt,
-      system_prompt: PROMPT_WRITER_SYSTEM_PROMPT,
-    },
-  });
-  if (typeof output === "string") {
-    return output;
-  }
-  if (Array.isArray(output)) {
-    return output.join("");
-  }
-  throw new Error("Invalid response from Replicate: " + typeof output);
+  return `A plated serving of "${meal}" as the clear focal point. ${styleBrief}`;
 };
 
 const generateImage = async (prompt: string): Promise<string> => {
