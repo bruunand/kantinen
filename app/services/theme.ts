@@ -13,5 +13,4 @@ export const Themes = [
   { id: "prison", displayName: "🧟 Prison" },
   { id: "streetfood", displayName: "🌯 Street Food" },
   { id: "sweatshop", displayName: "🏭 Sweatshop" },
-  { id: "cyberpunk", displayName: "👾 Cyberpunk" },
 ] as const;

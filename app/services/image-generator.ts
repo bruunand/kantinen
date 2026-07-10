@@ -30,9 +30,8 @@ Given a meal and a style brief, respond with a single image prompt in English as
 Rules:
 - The dish is the hero: name its actual components and describe their colors, textures and plating so the food is instantly recognizable. Do not invent components the meal name doesn't imply.
 - Meal names may be in Danish; translate them and depict the dish faithfully.
-- Composition: one plated serving, centered and filling most of the frame, seen from a natural three-quarter angle, food in sharp focus with the setting softly blurred behind it.
+- Composition: one plated serving as the clear focal point, seen from a natural three-quarter angle, with the frame wide enough that the surrounding setting and its props stay clearly visible around and behind the dish.
 - Weave in every element of the style brief (setting, props, lighting, mood, medium) and let its mood win: a bleak brief means bleak, carelessly served food; an inviting brief means steam, gloss and fresh color.
-- Keep it under 100 words.
 - Respond ONLY with the prompt, no quotes or preamble.`;
 
 const themeStyleBriefs: Record<Theme, string> = {
@@ -47,9 +46,6 @@ const themeStyleBriefs: Record<Theme, string> = {
 
   sweatshop:
     "Photorealistic. Late-night developer den: meal balanced next to an RGB mechanical keyboard on a cluttered desk, glow of code-filled monitors, crushed Monster energy drink cans, tangled cables, cold blue screen light mixed with a warm desk lamp, crunch-time atmosphere.",
-
-  cyberpunk:
-    "Cyberpunk noodle-bar scene: dish on a chrome counter under pink, blue and green neon, flickering holographic haze, rain-streaked window with a glowing megacity beyond, faint steam catching the neon, gritty high-tech dystopian mood, cinematic contrast.",
 };
 
 const generateTextPromptForMeal = (meal: string, theme: Theme): string => {
