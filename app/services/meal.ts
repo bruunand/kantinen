@@ -1,8 +1,8 @@
-import { getNextMealDate } from "./date";
+import { toDateString } from "./date";
 import { getNameForMeal } from "./meal-name";
 
-export const getCurrentMeals = async (): Promise<Meal[]> => {
-  const todaysMenu = await getTodaysMenu();
+export const getCurrentMeals = async (mealTime: Date): Promise<Meal[]> => {
+  const todaysMenu = await getTodaysMenu(mealTime);
   if (!todaysMenu) {
     return [{ text: "¯\\_(ツ)_/¯", vegeratian: false }];
   }
@@ -16,9 +16,10 @@ export const getCurrentMeals = async (): Promise<Meal[]> => {
   });
 };
 
-const getTodaysMenu = async (): Promise<DailyMenu[] | undefined> => {
-  const mealTime = getNextMealDate();
-  const mealTimeDateString = mealTime.toISOString().split("T")[0];
+const getTodaysMenu = async (
+  mealTime: Date
+): Promise<DailyMenu[] | undefined> => {
+  const mealTimeDateString = toDateString(mealTime);
   const apiRequestParams = new URLSearchParams({
     restaurantId: "1042",
     languageCode: "da-DK",
