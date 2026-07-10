@@ -92,6 +92,7 @@ export default function Index() {
           {previousDate ? (
             <Link
               to={linkToDate(previousDate)}
+              prefetch="render"
               className="day-nav-link"
               aria-label="Forrige dag"
             >
@@ -110,6 +111,7 @@ export default function Index() {
           {nextDate ? (
             <Link
               to={linkToDate(nextDate)}
+              prefetch="render"
               className="day-nav-link"
               aria-label="Næste dag"
             >
