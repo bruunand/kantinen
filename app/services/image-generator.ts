@@ -5,6 +5,8 @@ import { getRequiredEnv } from "./variables";
 
 const replicate = new Replicate({
   auth: getRequiredEnv("REPLICATE_API_TOKEN"),
+  // replicate >=1.0 returns FileOutput streams by default; we rely on URL strings
+  useFileOutput: false,
 });
 
 export const generateImageForMeal = async (
