@@ -1,9 +1,7 @@
-import { getNextMealDate } from "./date";
 import { getImageUrlForKey } from "./image-uploader";
 import { Theme } from "./theme";
 
-export const getImageBackground = async (theme: Theme) => {
-  const date = getNextMealDate();
+export const getImageBackground = async (theme: Theme, date: Date) => {
   const key = getCacheKey(date, theme);
   const url = await getImageUrlForKey(key).catch((error) => {
     console.error(`Could not determine if an image already exists`, {

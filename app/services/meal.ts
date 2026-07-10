@@ -1,8 +1,11 @@
-import { getNextMealDate } from "./date";
+import { cached } from "./cache";
+import { getWeekdayDates, toDateString } from "./date";
 import { getNameForMeal } from "./meal-name";
 
-export const getCurrentMeals = async (): Promise<Meal[]> => {
-  const todaysMenu = await getTodaysMenu();
+const MENU_CACHE_TTL_MS = 15 * 60 * 1000;
+
+export const getCurrentMeals = async (mealTime: Date): Promise<Meal[]> => {
+  const todaysMenu = await getTodaysMenu(mealTime);
   if (!todaysMenu) {
     return [{ text: "¯\\_(ツ)_/¯", vegeratian: false }];
   }
@@ -16,18 +19,24 @@ export const getCurrentMeals = async (): Promise<Meal[]> => {
   });
 };
 
-const getTodaysMenu = async (): Promise<DailyMenu[] | undefined> => {
-  const mealTime = getNextMealDate();
-  const mealTimeDateString = mealTime.toISOString().split("T")[0];
-  const apiRequestParams = new URLSearchParams({
-    restaurantId: "1042",
-    languageCode: "da-DK",
-    date: mealTimeDateString,
+const getTodaysMenu = async (
+  mealTime: Date
+): Promise<DailyMenu[] | undefined> => {
+  const mealTimeDateString = toDateString(mealTime);
+  // The API returns the full week for any date within it, so cache by the
+  // week's Monday to share one fetch across all days
+  const weekKey = toDateString(getWeekdayDates(mealTime)[0]);
+  const menu = await cached(`menu-${weekKey}`, MENU_CACHE_TTL_MS, async () => {
+    const apiRequestParams = new URLSearchParams({
+      restaurantId: "1042",
+      languageCode: "da-DK",
+      date: mealTimeDateString,
+    });
+    const response = await fetch(
+      `https://www.shop.foodandco.dk/api/WeeklyMenu?${apiRequestParams}`
+    );
+    return (await response.json()) as Menu;
   });
-  const response = await fetch(
-    `https://www.shop.foodandco.dk/api/WeeklyMenu?${apiRequestParams}`
-  );
-  const menu = (await response.json()) as Menu;
 
   const dayOfWeek = mealTime
     .toLocaleDateString("da-DK", { weekday: "long" })

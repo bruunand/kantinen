@@ -17,13 +17,25 @@ export const persistImageInCloud = async (key: string, imgUrl: string) => {
   return uploadResult.url;
 };
 
+// Only positive results are cached: a missing image may be generated later
+const urlCache = new Map<string, string>();
+
 export const getImageUrlForKey = async (
   key: string
 ): Promise<string | null> => {
+  const cachedUrl = urlCache.get(key);
+  if (cachedUrl) {
+    return cachedUrl;
+  }
+
   // First check if it exists, if it does, get the url, else return null
   const existsSearch = await cloudinary.search
     .expression(`public_id:meals/${key}`)
     .execute();
 
-  return existsSearch?.resources?.[0]?.url || null;
+  const url = existsSearch?.resources?.[0]?.url || null;
+  if (url) {
+    urlCache.set(key, url);
+  }
+  return url;
 };
