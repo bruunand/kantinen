@@ -22,10 +22,13 @@ export const getImageBackground = async (theme: Theme) => {
   return url;
 };
 
+// Bump to invalidate all cached images (e.g. after changing image model or prompts)
+const IMAGE_CACHE_VERSION = "v2-z-image";
+
 export const getCacheKey = (date: Date, theme: Theme): string => {
   // Convert Date object into ISO Date string (no timestamp) (example: 2024-07-31)
   const dateString = date.toISOString().split("T")[0];
-  return `flux-${theme}-${dateString}`;
+  return `${IMAGE_CACHE_VERSION}-${theme}-${dateString}`;
 };
 
 const FALLBACK_IMAGE = "https://picsum.photos/id/292/1900/1300";
