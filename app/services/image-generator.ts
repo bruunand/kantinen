@@ -46,6 +46,9 @@ const themeStyleBriefs: Record<Theme, string> = {
 
   sweatshop:
     "Photorealistic. Late-night developer den: meal balanced next to an RGB mechanical keyboard on a cluttered desk, glow of code-filled monitors, crushed Monster energy drink cans, tangled cables, cold blue screen light mixed with a warm desk lamp, crunch-time atmosphere.",
+
+  manga:
+    "Colorized manga / anime illustration laid out as a classic multi-panel comic page: bold black ink outlines, cel shading, halftone screentone textures and dynamic slanted panel gutters with white borders. The large hero panel is a close-up of the plated dish rendered in vivid saturated color as the clear focal point; smaller surrounding panels show speed lines, sparkle and steam effects, a delighted character reacting, and Japanese-style onomatopoeia. Vibrant, energetic shonen cooking-manga mood.",
 };
 
 const generateTextPromptForMeal = (meal: string, theme: Theme): string => {

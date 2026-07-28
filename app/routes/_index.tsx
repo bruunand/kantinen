@@ -51,6 +51,7 @@ export default function Index() {
 
   const linkToDate = (target: string) => {
     const params = new URLSearchParams(searchParams);
+    params.set("theme", theme);
     if (target === defaultDate) {
       params.delete("date");
     } else {
