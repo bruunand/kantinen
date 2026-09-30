@@ -1,59 +1,80 @@
 import { cached } from "./cache";
 import { getWeekdayDates, toDateString } from "./date";
 import { getNameForMeal } from "./meal-name";
+import { getRequiredEnv } from "./variables";
 
 const MENU_CACHE_TTL_MS = 15 * 60 * 1000;
+// Firebase ID tokens expire after 1 hour
+const TOKEN_CACHE_TTL_MS = 50 * 60 * 1000;
+// Public Firebase web key, taken from Kanpla's web app bundle
+const KANPLA_FIREBASE_KEY = "AIzaSyDDtuovWpK6PARKIt9wUqaTQP7MjFWIWF4";
 
 export const getCurrentMeals = async (mealTime: Date): Promise<Meal[]> => {
   const todaysMenu = await getTodaysMenu(mealTime);
-  if (!todaysMenu) {
+  if (!todaysMenu?.length) {
     return [{ text: "¯\\_(ツ)_/¯", vegeratian: false }];
   }
 
-  return todaysMenu.map<Meal>((menu) => {
+  return todaysMenu.map<Meal>((product) => {
     return {
-      originalMealName: menu.menu,
-      text: getNameForMeal(menu.menu),
-      vegeratian: menu.type === VEGETARIAN_MENU,
+      originalMealName: product.name,
+      text: getNameForMeal(product.name),
+      vegeratian: false,
     };
   });
 };
 
 const getTodaysMenu = async (
   mealTime: Date
-): Promise<DailyMenu[] | undefined> => {
-  const mealTimeDateString = toDateString(mealTime);
+): Promise<Product[] | undefined> => {
   // The API returns the full week for any date within it, so cache by the
   // week's Monday to share one fetch across all days
   const weekKey = toDateString(getWeekdayDates(mealTime)[0]);
   const menu = await cached(`menu-${weekKey}`, MENU_CACHE_TTL_MS, async () => {
-    const apiRequestParams = new URLSearchParams({
-      restaurantId: "1042",
-      languageCode: "da-DK",
-      date: mealTimeDateString,
-    });
     const response = await fetch(
-      `https://www.shop.foodandco.dk/api/WeeklyMenu?${apiRequestParams}`
+      "https://foodandco.kanpla.dk/api/internal/v2/menu/products/loadByWeek",
+      {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${await getKanplaToken()}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          childId: "xsYGn8jNBZSyVJxB6qy0",
+          schoolId: "XRxd9FC117vREtGzOUI0",
+          moduleId: "J0GT1F1EVCiNPABjzKYL",
+          weekDate: weekKey,
+        }),
+      }
     );
+    if (!response.ok) {
+      throw new Error(`Could not fetch menu: ${response.status}`);
+    }
     return (await response.json()) as Menu;
   });
 
-  const dayOfWeek = mealTime
-    .toLocaleDateString("da-DK", { weekday: "long" })
-    .toLowerCase();
-
-  const menuForToday = menu?.days.find(
-    (day) => day.dayOfWeek.toLowerCase() === dayOfWeek
-  )?.menus;
-
-  if (menuForToday?.[0]?.menu?.includes("Menuen er ikke klar endnu")) {
-    return undefined;
-  }
-
-  return menuForToday;
+  return menu.productsByDate[toDateString(mealTime)]?.products;
 };
 
-const VEGETARIAN_MENU = "Dagens varme vegatar";
+const getKanplaToken = () =>
+  cached("kanpla-token", TOKEN_CACHE_TTL_MS, async () => {
+    const response = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${KANPLA_FIREBASE_KEY}`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          email: getRequiredEnv("KANPLA_EMAIL"),
+          password: getRequiredEnv("KANPLA_PASSWORD"),
+          returnSecureToken: true,
+        }),
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`Could not log in to Kanpla: ${response.status}`);
+    }
+    return ((await response.json()) as { idToken: string }).idToken;
+  });
 
 interface Meal {
   text: string;
@@ -61,18 +82,12 @@ interface Meal {
   originalMealName?: string;
 }
 
-interface DailyMenu {
-  type: string;
-  menu: string;
-}
-
-interface Day {
-  dayOfWeek: string;
-  menus: DailyMenu[];
+interface Product {
+  name: string;
+  description?: string;
+  category: string;
 }
 
 interface Menu {
-  type: string;
-  menu: string;
-  days: Day[];
+  productsByDate: Record<string, { products: Product[] }>;
 }
