@@ -14,7 +14,7 @@ describe("getCacheKey", () => {
     const key = getCacheKey(date, "prison");
 
     // Assert
-    expect(key).toBe("v3-corax-prison-2024-07-31");
+    expect(key).toBe("v3.1-corax-prison-2024-07-31");
   });
 
   it("gives different themes different keys on the same date", () => {
