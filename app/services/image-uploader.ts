@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import { getRequiredEnv } from "./variables";
 
 cloudinary.config({
@@ -7,12 +7,19 @@ cloudinary.config({
   api_secret: getRequiredEnv("CLOUDINARY_API_SECRET"),
 });
 
-export const persistImageInCloud = async (key: string, imgUrl: string) => {
-  console.log("Caching image for future visits", { key, imgUrl });
-  const uploadResult = await cloudinary.uploader.upload(imgUrl, {
-    public_id: key,
-    folder: "meals",
-  });
+export const persistImageInCloud = async (key: string, image: Buffer) => {
+  console.log("Caching image for future visits", { key, bytes: image.length });
+
+  const uploadResult = await new Promise<UploadApiResponse>(
+    (resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { public_id: key, folder: "meals" },
+        (error, result) =>
+          result ? resolve(result) : reject(error ?? new Error("Upload failed"))
+      );
+      stream.end(image);
+    }
+  );
 
   return uploadResult.url;
 };

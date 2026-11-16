@@ -134,6 +134,14 @@ export default function Index() {
         ))}
         <img src={backgroundImageUrl} className="background" />
       </div>
+      <a
+        href="https://trifork.com/corax-ai/"
+        className="powered-by"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Powered by Corax AI
+      </a>
     </main>
   );
 }

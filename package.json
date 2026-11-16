@@ -7,7 +7,8 @@
     "build": "remix build",
     "dev": "remix dev",
     "start": "remix-serve ./build/index.js",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "test": "vitest run"
   },
   "dependencies": {
     "@remix-run/css-bundle": "^2.17.5",
@@ -17,8 +18,7 @@
     "cloudinary": "^2.10.0",
     "isbot": "^5.2.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "replicate": "^1.4.0"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.17.5",
@@ -26,7 +26,8 @@
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "eslint": "^8.57.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
   },
   "engines": {
     "node": ">=18.0.0"
