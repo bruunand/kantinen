@@ -1,95 +1,109 @@
-import Replicate from "replicate";
 import { persistImageInCloud } from "./image-uploader";
 import { Theme } from "./theme";
 import { getRequiredEnv } from "./variables";
 
-const replicate = new Replicate({
-  auth: getRequiredEnv("REPLICATE_API_TOKEN"),
-  // replicate >=1.0 returns FileOutput streams by default; we rely on URL strings
-  useFileOutput: false,
-});
+const CORAX_API_URL = "https://api.corax.app/v1";
+const CORAX_CAPABILITY_ID = "371853b5-aada-4934-b161-5c37f5203c9a";
 
+const POLL_INTERVAL_MS = 3_000;
+const POLL_TIMEOUT_MS = 3 * 60 * 1000;
+const FAILED_STATUSES = ["failed", "failure", "error", "cancelled"];
+
+// Deliberately high level: the Corax capability owns the visual details, we
+// only steer the setting and keep the props that make each theme recognizable.
+export const themeDescriptions: Record<Theme, string> = {
+  neutral: "Nordic minimalist restaurant",
+  prison: "Prison cafeteria",
+  streetfood: "Busy evening street food market",
+  sweatshop: "Code sweatshop, White Monster cans visible",
+};
+
+interface CoraxExecution {
+  id: string;
+  status: string;
+  result?: { file_id: string };
+}
+
+/** Generates an image of the meal with Corax and stores it in the cloud under the given key. */
 export const generateImageForMeal = async (
   key: string,
   meal: string,
   theme: Theme
 ) => {
-  console.log("Generating prompt for a new image", { key, meal, theme });
-  const mealDescription = await runTextPrompt(
-    generateTextPromptForMeal(meal, theme)
-  );
-  console.log("Generating image with prompt", { prompt: mealDescription });
-
-  const imageUrl = await generateImage(mealDescription);
-  return await persistImageInCloud(key, imageUrl);
-};
-
-const PROMPT_WRITER_SYSTEM_PROMPT = `You write prompts for a text-to-image model.
-Given a meal and a style brief, respond with a single image prompt in English as one flowing paragraph.
-
-Rules:
-- The dish is the hero: name its actual components and describe their colors, textures and plating so the food is instantly recognizable. Do not invent components the meal name doesn't imply.
-- Meal names may be in Danish; translate them and depict the dish faithfully.
-- Composition: one plated serving as the clear focal point, seen from a natural three-quarter angle, with the frame wide enough that the surrounding setting and its props stay clearly visible around and behind the dish.
-- Weave in every element of the style brief (setting, props, lighting, mood, medium) and let its mood win: a bleak brief means bleak, carelessly served food; an inviting brief means steam, gloss and fresh color.
-- Respond ONLY with the prompt, no quotes or preamble.`;
-
-const themeStyleBriefs: Record<Theme, string> = {
-  neutral:
-    "Photorealistic food photography. Nordic minimalist restaurant: handmade ceramic plate on a pale oak table, soft diffused daylight from a window, muted natural tones, shallow depth of field, 85mm macro lens, refined plating with delicate garnish.",
-
-  prison:
-    "Photorealistic. Maximum security prison cafeteria: dented stainless steel compartment tray, carelessly slopped portions, harsh green-tinted fluorescent light, scratched metal table bolted to the floor, gray concrete walls, bleak institutional mood.",
-
-  streetfood:
-    "Photorealistic. Bustling evening street food market: dish served in greaseproof paper at a food cart, steam rising, sizzling grill, golden hour glow mixed with string lights, blurred crowd and market stalls in the background, vibrant and lively.",
-
-  sweatshop:
-    "Photorealistic. Late-night developer den: meal balanced next to an RGB mechanical keyboard on a cluttered desk, glow of code-filled monitors, crushed Monster energy drink cans, tangled cables, cold blue screen light mixed with a warm desk lamp, crunch-time atmosphere.",
-};
-
-const generateTextPromptForMeal = (meal: string, theme: Theme): string => {
-  const styleBrief = themeStyleBriefs[theme];
-  if (!styleBrief) {
+  const themeDescription = themeDescriptions[theme];
+  if (!themeDescription) {
     throw new Error(`Unsupported theme: ${theme}`);
   }
-  return `Meal: "${meal}"\nStyle brief: ${styleBrief}`;
+
+  console.log("Generating image with Corax", { key, meal, theme });
+
+  const execution = await startExecution(meal, themeDescription);
+  const fileId = await waitForResultFile(execution.id);
+  const image = await downloadFile(fileId);
+
+  return await persistImageInCloud(key, image);
 };
 
-const runTextPrompt = async (prompt: string) => {
-  // https://replicate.com/openai/gpt-5-mini/api
-  const output = await replicate.run("openai/gpt-5-mini", {
-    input: {
-      prompt,
-      system_prompt: PROMPT_WRITER_SYSTEM_PROMPT,
+const coraxFetch = async (path: string, init: RequestInit = {}) => {
+  const response = await fetch(`${CORAX_API_URL}${path}`, {
+    ...init,
+    headers: {
+      ...init.headers,
+      "X-API-Key": getRequiredEnv("CORAX_API_KEY"),
     },
   });
-  if (typeof output === "string") {
-    return output;
+  if (!response.ok) {
+    throw new Error(`Corax request to ${path} failed: ${response.status}`);
   }
-  if (Array.isArray(output)) {
-    return output.join("");
-  }
-  throw new Error("Invalid response from Replicate: " + typeof output);
+
+  return response;
 };
 
-const generateImage = async (prompt: string): Promise<string> => {
-  const output = await replicate.run("prunaai/z-image-turbo", {
-    input: {
-      prompt,
-      width: 1280,
-      height: 720,
-      output_quality: 100,
-      output_format: "jpg",
-    },
-  });
+const startExecution = async (
+  dish: string,
+  theme: string
+): Promise<CoraxExecution> => {
+  const response = await coraxFetch(
+    `/capabilities/${CORAX_CAPABILITY_ID}/executions`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        // isBirthday is required by the capability but never wanted here
+        payload: { variables: { dish, theme, isBirthday: "false" } },
+      }),
+    }
+  );
 
-  console.log(output);
+  return (await response.json()) as CoraxExecution;
+};
 
+/** Polls the execution until it succeeds and returns the id of the generated file. */
+const waitForResultFile = async (executionId: string): Promise<string> => {
+  const deadline = Date.now() + POLL_TIMEOUT_MS;
 
-  if (typeof output !== "string") {
-    throw new Error("Expected image url from image generator");
+  while (Date.now() < deadline) {
+    const response = await coraxFetch(
+      `/capabilities/${CORAX_CAPABILITY_ID}/executions/${executionId}`
+    );
+    const execution = (await response.json()) as CoraxExecution;
+
+    if (execution.status === "success" && execution.result?.file_id) {
+      return execution.result.file_id;
+    }
+    if (FAILED_STATUSES.includes(execution.status)) {
+      throw new Error(`Corax execution ${executionId} ${execution.status}`);
+    }
+
+    await sleep(POLL_INTERVAL_MS);
   }
 
-  return output;
+  throw new Error(`Corax execution ${executionId} timed out`);
 };
+
+const downloadFile = async (fileId: string) => {
+  const response = await coraxFetch(`/files/${fileId}/content`);
+  return Buffer.from(await response.arrayBuffer());
+};
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
