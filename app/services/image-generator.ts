@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { persistImageInCloud } from "./image-uploader";
 import { Theme } from "./theme";
 import { getRequiredEnv } from "./variables";
@@ -9,13 +11,28 @@ const POLL_INTERVAL_MS = 3_000;
 const POLL_TIMEOUT_MS = 3 * 60 * 1000;
 const FAILED_STATUSES = ["failed", "failure", "error", "cancelled"];
 
+const CONTEXT_IMAGE_DIR = path.join(process.cwd(), "resources");
+const DRIVE_THRU_CHAINS = ["McDonald's", "Burger King"];
+
+interface ThemePrompt {
+  /** Called per generation so a theme can vary between runs. */
+  describe: () => string;
+  /** JPEG under resources/ that Corax gets as visual context for the scene. */
+  contextImage?: string;
+}
+
 // Deliberately high level: the Corax capability owns the visual details, we
 // only steer the setting and keep the props that make each theme recognizable.
-export const themeDescriptions: Record<Theme, string> = {
-  neutral: "Nordic minimalist restaurant",
-  prison: "Prison cafeteria",
-  streetfood: "Busy evening street food market",
-  sweatshop: "Code sweatshop, White Monster cans visible",
+export const themePrompts: Record<Theme, ThemePrompt> = {
+  neutral: { describe: () => "Nordic minimalist restaurant" },
+  prison: { describe: () => "Prison cafeteria" },
+  streetfood: { describe: () => "Busy evening street food market" },
+  sweatshop: { describe: () => "Code sweatshop, White Monster cans visible" },
+  drivethru: {
+    describe: () =>
+      `${pickRandom(DRIVE_THRU_CHAINS)} drive-thru window, the person in this photo is the employee handing out the dish`,
+    contextImage: "mpba.jpg",
+  },
 };
 
 interface CoraxExecution {
@@ -30,14 +47,24 @@ export const generateImageForMeal = async (
   meal: string,
   theme: Theme
 ) => {
-  const themeDescription = themeDescriptions[theme];
-  if (!themeDescription) {
+  const themePrompt = themePrompts[theme];
+  if (!themePrompt) {
     throw new Error(`Unsupported theme: ${theme}`);
   }
 
-  console.log("Generating image with Corax", { key, meal, theme });
+  const themeDescription = themePrompt.describe();
+  const contextImages = themePrompt.contextImage
+    ? [await readContextImage(themePrompt.contextImage)]
+    : [];
 
-  const execution = await startExecution(meal, themeDescription);
+  console.log("Generating image with Corax", {
+    key,
+    meal,
+    theme,
+    themeDescription,
+  });
+
+  const execution = await startExecution(meal, themeDescription, contextImages);
   const fileId = await waitForResultFile(execution.id);
   const image = await downloadFile(fileId);
 
@@ -59,9 +86,16 @@ const coraxFetch = async (path: string, init: RequestInit = {}) => {
   return response;
 };
 
+/** Reads an image from resources/ as a data URL, the format Corax accepts for blobs. */
+const readContextImage = async (fileName: string): Promise<string> => {
+  const image = await readFile(path.join(CONTEXT_IMAGE_DIR, fileName));
+  return `data:image/jpeg;base64,${image.toString("base64")}`;
+};
+
 const startExecution = async (
   dish: string,
-  theme: string
+  theme: string,
+  blobs: string[]
 ): Promise<CoraxExecution> => {
   const response = await coraxFetch(
     `/capabilities/${CORAX_CAPABILITY_ID}/executions`,
@@ -69,8 +103,11 @@ const startExecution = async (
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        // isBirthday is required by the capability but never wanted here
-        payload: { variables: { dish, theme, isBirthday: "false" } },
+        payload: {
+          // isBirthday is required by the capability but never wanted here
+          variables: { dish, theme, isBirthday: "false" },
+          ...(blobs.length > 0 && { blobs }),
+        },
       }),
     }
   );
@@ -107,3 +144,6 @@ const downloadFile = async (fileId: string) => {
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const pickRandom = <T>(items: T[]): T =>
+  items[Math.floor(Math.random() * items.length)];

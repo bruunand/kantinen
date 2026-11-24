@@ -1,10 +1,15 @@
+import { readFile } from "node:fs/promises";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { generateImageForMeal, themeDescriptions } from "./image-generator";
+import { generateImageForMeal, themePrompts } from "./image-generator";
 import { persistImageInCloud } from "./image-uploader";
 import { Themes } from "./theme";
 
 vi.mock("./image-uploader", () => ({
   persistImageInCloud: vi.fn(),
+}));
+
+vi.mock("node:fs/promises", () => ({
+  readFile: vi.fn(),
 }));
 
 const EXECUTION_ID = "execution-1";
@@ -72,7 +77,7 @@ describe("generateImageForMeal", () => {
         payload: {
           variables: {
             dish: "Lasagne",
-            theme: themeDescriptions.sweatshop,
+            theme: themePrompts.sweatshop.describe(),
             isBirthday: "false",
           },
         },
@@ -108,6 +113,46 @@ describe("generateImageForMeal", () => {
       expect(key).toBe("my-key");
       expect(Array.from(image)).toEqual(Array.from(IMAGE_BYTES));
       expect(url).toBe("https://cdn/image.png");
+    });
+  });
+
+  describe("context images", () => {
+    const requestPayload = () =>
+      JSON.parse(fetchMock.mock.calls[0][1]?.body as string).payload;
+
+    beforeEach(() => {
+      fetchMock
+        .mockResolvedValueOnce(startedResponse())
+        .mockResolvedValueOnce(successResponse())
+        .mockResolvedValueOnce(imageResponse());
+    });
+
+    it("sends the drive-thru photo as a JPEG data URL blob", async () => {
+      // Arrange: the photo on disk is a few known bytes
+      vi.mocked(readFile).mockResolvedValue(Buffer.from("photo") as never);
+
+      // Act: generate a drive-thru image
+      await generateImageForMeal("key", "Lasagne", "drivethru");
+
+      // Assert: the photo is read from resources/ and attached as a blob
+      expect(String(vi.mocked(readFile).mock.calls[0][0])).toMatch(
+        /resources[\\/]mpba\.jpg$/
+      );
+      expect(requestPayload().blobs).toEqual([
+        `data:image/jpeg;base64,${Buffer.from("photo").toString("base64")}`,
+      ]);
+    });
+
+    it("sends no blobs for themes without a context image", async () => {
+      // Arrange: prison has no context image
+      vi.mocked(readFile).mockClear();
+
+      // Act: generate a prison image
+      await generateImageForMeal("key", "Lasagne", "prison");
+
+      // Assert: nothing is read and the payload has no blobs
+      expect(readFile).not.toHaveBeenCalled();
+      expect(requestPayload()).not.toHaveProperty("blobs");
     });
   });
 
@@ -201,13 +246,17 @@ describe("generateImageForMeal", () => {
   });
 });
 
-describe("themeDescriptions", () => {
+describe("themePrompts", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("covers every theme", () => {
     // Arrange
     const themeIds = Themes.map((theme) => theme.id).sort();
 
     // Act
-    const describedThemes = Object.keys(themeDescriptions).sort();
+    const describedThemes = Object.keys(themePrompts).sort();
 
     // Assert
     expect(describedThemes).toEqual(themeIds);
@@ -215,9 +264,33 @@ describe("themeDescriptions", () => {
 
   it("keeps the Monster cans in the sweatshop theme", () => {
     // Arrange / Act
-    const description = themeDescriptions.sweatshop;
+    const description = themePrompts.sweatshop.describe();
 
     // Assert
     expect(description).toContain("Monster");
+  });
+
+  describe("drive-thru", () => {
+    it.each([
+      { random: 0, chain: "McDonald's" },
+      { random: 0.99, chain: "Burger King" },
+    ])("picks $chain when Math.random is $random", ({ random, chain }) => {
+      // Arrange: pin the random chain pick
+      vi.spyOn(Math, "random").mockReturnValue(random);
+
+      // Act: describe the drive-thru scene
+      const description = themePrompts.drivethru.describe();
+
+      // Assert: the picked chain is in the description
+      expect(description).toContain(chain);
+    });
+
+    it("uses the photo in resources as context", () => {
+      // Arrange / Act: look up the drive-thru prompt
+      const { contextImage } = themePrompts.drivethru;
+
+      // Assert: it points at the bundled photo
+      expect(contextImage).toBe("mpba.jpg");
+    });
   });
 });

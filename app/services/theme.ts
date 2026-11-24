@@ -57,4 +57,5 @@ export const Themes = [
   { id: "prison", displayName: "🧟 Prison" },
   { id: "streetfood", displayName: "🌯 Street Food" },
   { id: "sweatshop", displayName: "🏭 Sweatshop" },
+  { id: "drivethru", displayName: "🍔 Drive-Thru" },
 ] as const;
