@@ -1,6 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { persistImageInCloud } from "./image-uploader";
+import { getEmoji } from "./meal-name";
 import { Theme } from "./theme";
 import { getRequiredEnv } from "./variables";
 
@@ -18,11 +19,13 @@ const CONTEXT_IMAGE_TYPES: Record<string, string> = {
   ".png": "image/png",
   ".webp": "image/webp",
 };
-const DRIVE_THRU_CHAINS = ["McDonald's", "Burger King"];
+const BURGER_CHAINS = ["McDonald's", "Burger King"];
+const POULTRY_CHAIN = "KFC";
+const POULTRY_EMOJIS = ["🐔", "🦃"];
 
 interface ThemePrompt {
-  /** Called per generation so a theme can vary between runs. */
-  describe: () => string;
+  /** Called per generation so a theme can vary between runs and react to the meal. */
+  describe: (meal: string) => string;
   /** Send a random photo from resources/ to Corax as visual context for the scene. */
   usesContextImage?: boolean;
 }
@@ -35,8 +38,8 @@ export const themePrompts: Record<Theme, ThemePrompt> = {
   streetfood: { describe: () => "Busy evening street food market" },
   sweatshop: { describe: () => "Code sweatshop, White Monster cans visible" },
   drivethru: {
-    describe: () =>
-      `${pickRandom(DRIVE_THRU_CHAINS)} drive-thru window, the person in this photo is the employee handing out the dish`,
+    describe: (meal) =>
+      `${pickDriveThruChain(meal)} drive-thru window, the person in this photo is the employee handing out the dish`,
     usesContextImage: true,
   },
 };
@@ -58,7 +61,7 @@ export const generateImageForMeal = async (
     throw new Error(`Unsupported theme: ${theme}`);
   }
 
-  const themeDescription = themePrompt.describe();
+  const themeDescription = themePrompt.describe(meal);
   const contextImages = themePrompt.usesContextImage
     ? [await readRandomContextImage()]
     : [];
@@ -166,6 +169,16 @@ const downloadFile = async (fileId: string) => {
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * KFC for dishes the menu shows with a chicken or turkey emoji, so bird and
+ * chain match up; any other dish goes to a random burger chain.
+ */
+const pickDriveThruChain = (meal: string): string => {
+  const isPoultry = POULTRY_EMOJIS.includes(getEmoji(meal));
+
+  return isPoultry ? POULTRY_CHAIN : pickRandom(BURGER_CHAINS);
+};
 
 const pickRandom = <T>(items: T[]): T =>
   items[Math.floor(Math.random() * items.length)];

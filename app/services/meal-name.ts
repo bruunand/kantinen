@@ -2,7 +2,8 @@ export const getNameForMeal = (meal: string) => {
   return `${getEmoji(meal)} ${soupParser(meal)}`;
 };
 
-const getEmoji = (meal: string) => {
+/** The emoji for the first keyword the meal matches, or a plate when none do. */
+export const getEmoji = (meal: string) => {
   const mealToEmojiMap = new Map([
     [["hare"], "🐇"],
     [["vegetar", "vegan", "dahl"], "🥦"],

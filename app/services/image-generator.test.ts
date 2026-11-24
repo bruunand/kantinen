@@ -78,7 +78,7 @@ describe("generateImageForMeal", () => {
         payload: {
           variables: {
             dish: "Lasagne",
-            theme: themePrompts.sweatshop.describe(),
+            theme: themePrompts.sweatshop.describe("Lasagne"),
             isBirthday: "false",
           },
         },
@@ -305,7 +305,7 @@ describe("themePrompts", () => {
 
   it("keeps the Monster cans in the sweatshop theme", () => {
     // Arrange / Act
-    const description = themePrompts.sweatshop.describe();
+    const description = themePrompts.sweatshop.describe("Lasagne");
 
     // Assert
     expect(description).toContain("Monster");
@@ -315,15 +315,47 @@ describe("themePrompts", () => {
     it.each([
       { random: 0, chain: "McDonald's" },
       { random: 0.99, chain: "Burger King" },
-    ])("picks $chain when Math.random is $random", ({ random, chain }) => {
-      // Arrange: pin the random chain pick
-      vi.spyOn(Math, "random").mockReturnValue(random);
+    ])(
+      "picks $chain for a non-chicken dish when Math.random is $random",
+      ({ random, chain }) => {
+        // Arrange: pin the random chain pick
+        vi.spyOn(Math, "random").mockReturnValue(random);
 
-      // Act: describe the drive-thru scene
-      const description = themePrompts.drivethru.describe();
+        // Act: describe the drive-thru scene for a pasta dish
+        const description = themePrompts.drivethru.describe("Lasagne");
 
-      // Assert: the picked chain is in the description
-      expect(description).toContain(chain);
+        // Assert: the picked burger chain is in the description
+        expect(description).toContain(chain);
+      }
+    );
+
+    it.each([
+      "Kyllingebryst med ris",
+      "Hønsefrikassé serveret med kartofler",
+      "Kalkunbryst med flødekartofler",
+    ])(
+      "picks KFC for the poultry dish %s",
+      (meal) => {
+        // Arrange: randomness would otherwise land on Burger King
+        vi.spyOn(Math, "random").mockReturnValue(0.99);
+
+        // Act: describe the drive-thru scene for a poultry dish
+        const description = themePrompts.drivethru.describe(meal);
+
+        // Assert: chicken and turkey always go to KFC
+        expect(description).toContain("KFC");
+      }
+    );
+
+    it("does not pick KFC when another emoji wins over chicken", () => {
+      // Arrange: chili is matched before chicken, so the menu shows 🌶
+      vi.spyOn(Math, "random").mockReturnValue(0);
+
+      // Act: describe the drive-thru scene for a chili chicken dish
+      const description = themePrompts.drivethru.describe("Chili med kylling");
+
+      // Assert: it falls back to a burger chain
+      expect(description).toContain("McDonald's");
     });
 
     it("uses a photo from resources as context", () => {
