@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { persistImageInCloud } from "./image-uploader";
 import { Theme } from "./theme";
@@ -12,13 +12,19 @@ const POLL_TIMEOUT_MS = 3 * 60 * 1000;
 const FAILED_STATUSES = ["failed", "failure", "error", "cancelled"];
 
 const CONTEXT_IMAGE_DIR = path.join(process.cwd(), "resources");
+const CONTEXT_IMAGE_TYPES: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+};
 const DRIVE_THRU_CHAINS = ["McDonald's", "Burger King"];
 
 interface ThemePrompt {
   /** Called per generation so a theme can vary between runs. */
   describe: () => string;
-  /** JPEG under resources/ that Corax gets as visual context for the scene. */
-  contextImage?: string;
+  /** Send a random photo from resources/ to Corax as visual context for the scene. */
+  usesContextImage?: boolean;
 }
 
 // Deliberately high level: the Corax capability owns the visual details, we
@@ -31,7 +37,7 @@ export const themePrompts: Record<Theme, ThemePrompt> = {
   drivethru: {
     describe: () =>
       `${pickRandom(DRIVE_THRU_CHAINS)} drive-thru window, the person in this photo is the employee handing out the dish`,
-    contextImage: "mpba.jpg",
+    usesContextImage: true,
   },
 };
 
@@ -53,8 +59,8 @@ export const generateImageForMeal = async (
   }
 
   const themeDescription = themePrompt.describe();
-  const contextImages = themePrompt.contextImage
-    ? [await readContextImage(themePrompt.contextImage)]
+  const contextImages = themePrompt.usesContextImage
+    ? [await readRandomContextImage()]
     : [];
 
   console.log("Generating image with Corax", {
@@ -86,11 +92,27 @@ const coraxFetch = async (path: string, init: RequestInit = {}) => {
   return response;
 };
 
-/** Reads an image from resources/ as a data URL, the format Corax accepts for blobs. */
-const readContextImage = async (fileName: string): Promise<string> => {
+/**
+ * Picks a random image from resources/ and returns it as a data URL, the format
+ * Corax accepts for blobs. Listed per call so dropping in a photo needs no code change.
+ */
+const readRandomContextImage = async (): Promise<string> => {
+  const fileNames = await readdir(CONTEXT_IMAGE_DIR);
+  const imageNames = fileNames.filter((name) =>
+    Boolean(getImageMimeType(name))
+  );
+  if (imageNames.length === 0) {
+    throw new Error(`No context images found in ${CONTEXT_IMAGE_DIR}`);
+  }
+
+  const fileName = pickRandom(imageNames);
   const image = await readFile(path.join(CONTEXT_IMAGE_DIR, fileName));
-  return `data:image/jpeg;base64,${image.toString("base64")}`;
+
+  return `data:${getImageMimeType(fileName)};base64,${image.toString("base64")}`;
 };
+
+const getImageMimeType = (fileName: string): string | undefined =>
+  CONTEXT_IMAGE_TYPES[path.extname(fileName).toLowerCase()];
 
 const startExecution = async (
   dish: string,
