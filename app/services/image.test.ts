@@ -17,6 +17,17 @@ describe("getCacheKey", () => {
     expect(key).toBe("v3.4-corax-prison-2024-07-31");
   });
 
+  it("adds the theme's own version for themes bumped on their own", () => {
+    // Arrange: drive-thru has its own cache version
+    const date = new Date("2024-07-31T13:45:00Z");
+
+    // Act: build the drive-thru key
+    const key = getCacheKey(date, "drivethru");
+
+    // Assert: the theme version sits next to the theme
+    expect(key).toBe("v3.4-corax-drivethru-v2-2024-07-31");
+  });
+
   it("gives different themes different keys on the same date", () => {
     // Arrange
     const date = new Date("2024-07-31T00:00:00Z");
