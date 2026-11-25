@@ -1,7 +1,9 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
+import { getWeekdayDates, getWeekdayIndex } from "./date";
 import { persistImageInCloud } from "./image-uploader";
 import { getEmoji } from "./meal-name";
+import { shuffleWithSeed } from "./random";
 import { Theme } from "./theme";
 import { getRequiredEnv } from "./variables";
 
@@ -26,7 +28,7 @@ const POULTRY_EMOJIS = ["🐔", "🦃"];
 interface ThemePrompt {
   /** Called per generation so a theme can vary between runs and react to the meal. */
   describe: (meal: string) => string;
-  /** Send a random photo from resources/ to Corax as visual context for the scene. */
+  /** Send a photo from resources/ to Corax as visual context for the scene. */
   usesContextImage?: boolean;
 }
 
@@ -50,11 +52,15 @@ interface CoraxExecution {
   result?: { file_id: string };
 }
 
-/** Generates an image of the meal with Corax and stores it in the cloud under the given key. */
+/**
+ * Generates an image of the date's meal with Corax and stores it in the cloud
+ * under the given key.
+ */
 export const generateImageForMeal = async (
   key: string,
   meal: string,
-  theme: Theme
+  theme: Theme,
+  date: Date
 ) => {
   const themePrompt = themePrompts[theme];
   if (!themePrompt) {
@@ -63,7 +69,7 @@ export const generateImageForMeal = async (
 
   const themeDescription = themePrompt.describe(meal);
   const contextImages = themePrompt.usesContextImage
-    ? [await readRandomContextImage()]
+    ? [await readContextImageForDate(date)]
     : [];
 
   console.log("Generating image with Corax", {
@@ -96,10 +102,10 @@ const coraxFetch = async (path: string, init: RequestInit = {}) => {
 };
 
 /**
- * Picks a random image from resources/ and returns it as a data URL, the format
+ * Reads the date's photo from resources/ and returns it as a data URL, the format
  * Corax accepts for blobs. Listed per call so dropping in a photo needs no code change.
  */
-const readRandomContextImage = async (): Promise<string> => {
+const readContextImageForDate = async (date: Date): Promise<string> => {
   const fileNames = await readdir(CONTEXT_IMAGE_DIR);
   const imageNames = fileNames.filter((name) =>
     Boolean(getImageMimeType(name))
@@ -108,10 +114,26 @@ const readRandomContextImage = async (): Promise<string> => {
     throw new Error(`No context images found in ${CONTEXT_IMAGE_DIR}`);
   }
 
-  const fileName = pickRandom(imageNames);
+  const fileName = pickContextImageForDate(imageNames, date);
   const image = await readFile(path.join(CONTEXT_IMAGE_DIR, fileName));
 
   return `data:${getImageMimeType(fileName)};base64,${image.toString("base64")}`;
+};
+
+/**
+ * Shuffles the photos once per week and gives each weekday its own slot, so
+ * nobody shows up twice in a week while the order still varies week to week.
+ * Repeats only happen when there are fewer photos than weekdays.
+ */
+const pickContextImageForDate = (imageNames: string[], date: Date): string => {
+  const [monday] = getWeekdayDates(date);
+  const weekSeed = monday.toDateString();
+
+  // Sorted so the shuffle does not depend on the order readdir lists files in
+  const sortedNames = [...imageNames].sort();
+  const weekOrder = shuffleWithSeed(sortedNames, weekSeed);
+
+  return weekOrder[getWeekdayIndex(date) % weekOrder.length];
 };
 
 const getImageMimeType = (fileName: string): string | undefined =>

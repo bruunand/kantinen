@@ -65,7 +65,7 @@ const generateImagesForAllThemes = async (
       return;
     }
 
-    return generateImageForMeal(key, meal, theme.id).catch((error) =>
+    return generateImageForMeal(key, meal, theme.id, date).catch((error) =>
       console.error(
         "Could not generate image for meal on generate route",
         error

@@ -10,10 +10,13 @@ export const getNextMealDate = () => {
   return baseTime;
 };
 
+// Position of the date in its week, Monday being 0
+export const getWeekdayIndex = (date: Date) => (date.getDay() + 6) % 7;
+
 // Monday through Friday of the week containing the given date
 export const getWeekdayDates = (baseDate: Date): Date[] => {
   const monday = new Date(baseDate);
-  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  monday.setDate(monday.getDate() - getWeekdayIndex(monday));
   return Array.from({ length: 5 }, (_, index) => {
     const day = new Date(monday);
     day.setDate(monday.getDate() + index);
