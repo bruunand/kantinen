@@ -30,7 +30,7 @@ export const getAvailableImages = async (date: Date): Promise<ThemeImage[]> => {
 };
 
 // Bump to invalidate all cached images (e.g. after changing image model or prompts)
-const IMAGE_CACHE_VERSION = "v3.3-corax";
+const IMAGE_CACHE_VERSION = "v3.4-corax";
 
 export const getCacheKey = (date: Date, theme: Theme): string => {
   // Convert Date object into ISO Date string (no timestamp) (example: 2024-07-31)
