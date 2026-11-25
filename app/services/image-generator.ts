@@ -2,7 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { getWeekdayDates, getWeekdayIndex } from "./date";
 import { persistImageInCloud } from "./image-uploader";
-import { getEmoji } from "./meal-name";
+import { getMatchingEmojis } from "./meal-name";
 import { shuffleWithSeed } from "./random";
 import { Theme } from "./theme";
 import { getRequiredEnv } from "./variables";
@@ -193,11 +193,13 @@ const downloadFile = async (fileId: string) => {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * KFC for dishes the menu shows with a chicken or turkey emoji, so bird and
- * chain match up; any other dish goes to a random burger chain.
+ * KFC for any dish with chicken or turkey in it, even when the menu shows
+ * another emoji (a chicken burger gets 🍔); other dishes go to a random burger chain.
  */
 const pickDriveThruChain = (meal: string): string => {
-  const isPoultry = POULTRY_EMOJIS.includes(getEmoji(meal));
+  const isPoultry = getMatchingEmojis(meal).some((emoji) =>
+    POULTRY_EMOJIS.includes(emoji)
+  );
 
   return isPoultry ? POULTRY_CHAIN : pickRandom(BURGER_CHAINS);
 };

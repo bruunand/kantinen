@@ -452,14 +452,28 @@ describe("themePrompts", () => {
       }
     );
 
-    it("does not pick KFC when another emoji wins over chicken", () => {
-      // Arrange: chili is matched before chicken, so the menu shows 🌶
+    it.each(["Kyllingeburger med pommes frites", "Chili med kylling"])(
+      "picks KFC for %s even though another emoji wins on the menu",
+      (meal) => {
+        // Arrange: randomness would otherwise land on Burger King
+        vi.spyOn(Math, "random").mockReturnValue(0.99);
+
+        // Act: describe the drive-thru scene for a dish shown as 🍔 or 🌶
+        const description = themePrompts.drivethru.describe(meal);
+
+        // Assert: the chicken still sends it to KFC
+        expect(description).toContain("KFC");
+      }
+    );
+
+    it("picks a burger chain for a burger without poultry", () => {
+      // Arrange: pin the random chain pick to McDonald's
       vi.spyOn(Math, "random").mockReturnValue(0);
 
-      // Act: describe the drive-thru scene for a chili chicken dish
-      const description = themePrompts.drivethru.describe("Chili med kylling");
+      // Act: describe the drive-thru scene for a beef burger
+      const description = themePrompts.drivethru.describe("Oksekødsburger");
 
-      // Assert: it falls back to a burger chain
+      // Assert: no poultry, no KFC
       expect(description).toContain("McDonald's");
     });
 
