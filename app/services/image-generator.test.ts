@@ -477,6 +477,15 @@ describe("themePrompts", () => {
       expect(description).toContain("McDonald's");
     });
 
+    it("dresses the employee in a hat and an earpiece", () => {
+      // Arrange / Act: describe the drive-thru scene
+      const description = themePrompts.drivethru.describe("Lasagne");
+
+      // Assert: both props are asked for
+      expect(description).toContain("hat");
+      expect(description).toContain("earpiece");
+    });
+
     it("uses a photo from resources as context", () => {
       // Arrange / Act: look up the drive-thru prompt
       const { usesContextImage } = themePrompts.drivethru;

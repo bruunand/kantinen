@@ -41,7 +41,7 @@ export const themePrompts: Record<Theme, ThemePrompt> = {
   sweatshop: { describe: () => "Code sweatshop, White Monster cans visible" },
   drivethru: {
     describe: (meal) =>
-      `${pickDriveThruChain(meal)} drive-thru window, the person in this photo is the employee handing out the dish`,
+      `${pickDriveThruChain(meal)} drive-thru window, the person in this photo is the employee handing out the dish, wearing a hat and an earpiece`,
     usesContextImage: true,
   },
 };
